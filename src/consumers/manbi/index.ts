@@ -5,7 +5,7 @@ import Manbi from './manbi';
 const symbol_buy = 'conieth';
 const symbol_sell = 'conieth';
 
-let manbi = new Manbi('e7179ea88e88724e3974f4da8f059747', '6fc88f2ce2b54ffc871a3d9bdbed6454');
+let manbi = new Manbi('appid', 'secret');
 
 async function task () {
     let all = await Promise.all([ manbi.getBalance(), manbi.geTicker(), manbi.getOrderBook()]);
