@@ -4,6 +4,12 @@
     {
       "type": "node",
       "request": "launch",
+      "name": "Launch Program",
+      "program": "${workspaceFolder}/build/main/index.js"
+    },
+    {
+      "type": "node",
+      "request": "launch",
       "name": "Debug Project",
       // we test in `build` to make cleanup fast and easy
       "cwd": "${workspaceFolder}/build",
