@@ -29,6 +29,6 @@ export default class Manbi{
     let reqPamras = {} as any;
     reqPamras.json = method.toLowerCase() === 'post' ? true : undefined;
     console.log('ddd')
-    return Req.getJson(`${baseUrl}/${version}/${url}`, { ...params, sign }, method, reqPamras);
+    return Req.getJson(`${baseUrl}/${version}/${url}`, { ...params, sign }, method, { body: { json: true } });
   }
 }
