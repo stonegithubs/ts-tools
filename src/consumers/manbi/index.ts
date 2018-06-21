@@ -13,7 +13,7 @@ async function task () {
     let all = await Promise.all([ manbi.getBalance(), manbi.geTicker(), manbi.getOrderBook()]);
     let balance = formatBalance(all[0].balance); // 个人账户余额
     let ticker = all[1].ticker;  // 最新行情
-    let order = all[2].orderbook;  // 所有买卖挂单行情
+    // let order = all[2].orderbook;  // 所有买卖挂单行情
     let availableUSDT = balance.usdt.available;
     let availableCONI = balance.coni.available;
     if (availableUSDT > 1) {
