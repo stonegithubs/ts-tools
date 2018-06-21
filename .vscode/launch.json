@@ -4,6 +4,12 @@
     {
       "type": "node",
       "request": "launch",
+      "name": "manbi",
+      "program": "${workspaceFolder}/build/main/consumers/manbi/index.js"
+    },
+    {
+      "type": "node",
+      "request": "launch",
       "name": "Launch Program",
       "program": "${workspaceFolder}/build/main/index.js"
     },

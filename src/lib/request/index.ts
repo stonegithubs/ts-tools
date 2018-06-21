@@ -1,17 +1,28 @@
 import rp from 'request-promise';
 
 export default class MyReq{
-  static getJson(uri: string, data: object = {}, method: string = 'GET', params: any = {}): Promise<any> {
+  static getJson(uri: string, body: object = {}, method: string = 'GET', params: any = { form: true }): Promise<any> {
     const opt: object = {
       method, uri,
-      [method.toLowerCase() === 'get' ? 'qs' : 'form']: data,
       headers: {
         'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_1 like Mac OS X) AppleWebKit/603.1.30 (KHTML, like Gecko) Version/10.0 Mobile/14E304 Safari/602.1'
-      },
-      ...params,
-      json: true
+      }
     }
-    return rp(opt).then(res =>{
+
+    switch (method.toLowerCase()) {
+      case 'get':
+          params.qs = body;
+          params.form = undefined;
+        break;
+        case 'patch':
+        case 'post':
+        case 'put':
+        default:
+          params.body = body;
+        break;
+    }
+
+    return rp({ ...opt, ...params } ).then(res =>{
       return res;
     }, rej => {
       console.error(rej);
