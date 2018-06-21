@@ -5,7 +5,9 @@ import Manbi from './manbi';
 const symbol_buy = 'conieth';
 const symbol_sell = 'conieth';
 
-let manbi = new Manbi('appid', 'secret');
+let appid = '';
+let secret = '';
+let manbi = new Manbi(appid, secret);
 
 async function task () {
     let all = await Promise.all([ manbi.getBalance(), manbi.geTicker(), manbi.getOrderBook()]);
@@ -36,7 +38,7 @@ async function task () {
 task();
 
 function formatBalance(b) {
-    let data = {};
+    let data = {} as any;
     b.forEach(el => {
         data[el.asset.toLowerCase()] = el;
     });
