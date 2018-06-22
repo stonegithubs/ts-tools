@@ -9,7 +9,7 @@
     /* tslint-immutable rules */
     // Recommended built-in rules
     "no-var-keyword": true,
-    "no-parameter-reassignment": true,
+    // "no-parameter-reassignment": true,
     "typedef": [true, "call-signature"],
 
     // Immutability rules
@@ -27,7 +27,7 @@
     //   true,
     //   { "ignore-prefix": ["console.", "process.exit"] }
     // ],
-    "no-if-statement": true,
+    // "no-if-statement": true,
     /* end tslint-immutable rules */
 
     /******* 覆盖规则   ********/
@@ -37,6 +37,8 @@
     "member-access": false,
     "prefer-const": false,
     "no-this-assignment": false,
-    "no-parameter-reassignment": false
+    "no-parameter-reassignment": false,
+    "no-if-statement": false,
+    "variable-name": false
   }
 }
