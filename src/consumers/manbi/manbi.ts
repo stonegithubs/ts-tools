@@ -41,6 +41,10 @@ export default class Manbi{
     let rs = await this.getData('trade/order/open-orders', params);
     return rs;
   }
+  async cancelOrder(orderid) {
+    let rs = await this.getData('trade/order/cancel', { orderid });
+    return rs;
+  }
   getData(url, params: any = {}, method: string = 'post'): any {
     let { baseUrl, version } = Manbi;
     let { apiid } = this;

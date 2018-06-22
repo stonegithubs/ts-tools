@@ -21,9 +21,9 @@ export default class MyKoa{
     this.app = app;
     this.router = router;
   }
-  public listen(port: number, fn: (err: [null, Error]) => void): void {
+  public listen(port: number, fn?: (err: [null, Error]) => void): void {
     try {
-      this.app.listen(port, fn.bind(null, port));
+      this.app.listen(port, fn && fn.bind(null, port));
     } catch (error) {
       console.error(error);
       throw error;
