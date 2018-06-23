@@ -12,6 +12,7 @@ new Koa([
               if (users[user]) {
                   if (stop) {
                     users[user].stop();
+                    users[user] = undefined;
                     ctx.body = '已停止！';
                   } else {
                     ctx.body = '用户已经添加， 无需重复添加！';
