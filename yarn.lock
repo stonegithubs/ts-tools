@@ -3204,6 +3204,10 @@ modify-values@^1.0.0:
   version "1.0.1"
   resolved "http://registry.npm.taobao.org/modify-values/download/modify-values-1.0.1.tgz#b3939fa605546474e3e3e3c63d64bd43b4ee6022"
 
+moment@^2.22.2:
+  version "2.22.2"
+  resolved "https://registry.yarnpkg.com/moment/-/moment-2.22.2.tgz#3c257f9839fc0e93ff53149632239eb90783ff66"
+
 mount-point@^3.0.0:
   version "3.0.0"
   resolved "http://registry.npm.taobao.org/mount-point/download/mount-point-3.0.0.tgz#665cb9edebe80d110e658db56c31d0aef51a8f97"
