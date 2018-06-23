@@ -33,8 +33,8 @@ export default class Manbi{
     let rs = await this.getData('trade/order/place', params);
     return rs;
   }
-  async getOrderInfo(params: { orderid: string }): Promise<any> {
-    let rs = await this.getData('trade/order/info', params);
+  async getOrderInfo(orderid: string): Promise<any> {
+    let rs = await this.getData('trade/order/info', { orderid });
     return rs;
   }
   async getCurrentOrders(params: { symbol: string }): Promise<any> {

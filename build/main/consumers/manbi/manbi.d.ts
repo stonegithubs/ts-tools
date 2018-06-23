@@ -10,9 +10,7 @@ export default class Manbi {
     geTicker(): Promise<any>;
     getOrderBook(): Promise<any>;
     buyAndSell(params: object): Promise<any>;
-    getOrderInfo(params: {
-        orderid: string;
-    }): Promise<any>;
+    getOrderInfo(orderid: string): Promise<any>;
     getCurrentOrders(params: {
         symbol: string;
     }): Promise<any>;

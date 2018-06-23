@@ -15,4 +15,5 @@ export default class ManbiStratege1 extends Manbi {
     stop(): void;
     task(): Promise<void>;
     processOrders(ticker: object): Promise<any>;
+    getOvertopCount(orderList?: any[], limit?: number, count?: number): any;
 }

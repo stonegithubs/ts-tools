@@ -12,6 +12,7 @@ export default class ManbiStratege1 extends Manbi {
         super(apiid, secret);
     }
     run(): void {
+        // this.task();
         this.taskId = setInterval(() => this.task(), this.taskInterval * 1000);
     }
     stop() {
@@ -25,14 +26,16 @@ export default class ManbiStratege1 extends Manbi {
         // let order = all[2].orderbook;  // 所有买卖挂单行情
         // let availableUSDT = balance.usdt.available;
         let availableETH = balance.eth.available;
-        await this.processOrders(ticker);
+        // await this.processOrders(ticker);  // 处理线上挂单，超过3分钟订单等
         let availableCONI = balance.coni.available;
         if (availableETH > 0.01) {
             // buy
             // let price = ticker[0].ask;
             
-            let price = this.buyNum == -1 ? ticker[0].ask : onlineOrders.orderbook.bids[this.buyNum - 1].price;
+            // let price = this.buyNum == -1 ? ticker[0].ask : onlineOrders.orderbook.bids[this.buyNum - 1].price;
             // let price = ticker[0].bid;
+            let bigBid = this.getOvertopCount(onlineOrders.orderbook.bids, 3, 10000); // 单量超过 1 万算大单
+            let price = bigBid.price;
             let quantity: any = availableETH / price;
             quantity = quantity / (1 + ManbiStratege1.rate);
             quantity = quantity.toString().match(/.*\..{2}/)[0];
@@ -45,9 +48,32 @@ export default class ManbiStratege1 extends Manbi {
                 return;
             }
             let rs = await this.buyAndSell({ price, quantity, type, symbol });
+            if (rs.status === 'ok') {
+                // sell
+                let orderstatus = '';
+                let order;
+                do{
+                    try {
+                    order = await this.getOrderInfo(rs.orderid);  
+                    await new Promise(res => setTimeout(() => res(), 2000));
+                    } catch (error) {
+                        //
+                    }
+                    orderstatus = order && order.order && order.order.orderstatus;
+                } while(orderstatus != 'filled'); // 直到订单完成
+                let bigAsk = this.getOvertopCount(onlineOrders.orderbook.asks, 3, 10000); // 单量超过 1 万算大单
+                price = bigAsk.price;
+                type = 'sell-limit';
+                symbol = ManbiStratege1.symbolSell;
+                rs = await this.buyAndSell({ price, quantity, type, symbol });
+            }
             console.log(`买入\n价格: ${price}\t买入数量: ${quantity}\t手续费: ${ratePrice}\t\n`, rs);
         }
-        if (availableCONI > 1) {
+
+
+
+        // 原来的卖的方案, 使用 false 关闭
+        if (false && availableCONI > 1) {
             // sell
             // let price = ticker[0].bid;
             let price = this.sellNum == -1 ? ticker[0].bid : onlineOrders.orderbook.asks[this.sellNum - 1].price;
@@ -97,6 +123,22 @@ export default class ManbiStratege1 extends Manbi {
                 }
             }
         })
+    }
+
+    // 获取大单的前一个单， 作为卖的价格
+    getOvertopCount(orderList: any[] = [], limit = 100000000, count = 10000) {
+        let rt: any;
+        for(let index = 0,l = orderList.length; index < l; index++) {
+            let el = orderList[index];
+            if (el.quantity >= count) {
+                rt = index > 0 ? orderList[index - 1] : el;
+                return rt;
+            }
+            if (index > limit) {
+                return el;
+            }
+        }
+        return {};
     }
 }
 
