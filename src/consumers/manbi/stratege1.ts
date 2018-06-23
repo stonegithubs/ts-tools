@@ -39,11 +39,11 @@ export default class ManbiStratege1 extends Manbi {
             let ratePrice = quantity * ManbiStratege1.rate;
             let type = 'buy-limit';
             let symbol = ManbiStratege1.symbolBuy;
-            // let disparity = ticker[0].ask - ticker[0].bid;
-            // if (disparity > this.disparityLimit) {
-            //     console.log(`交易差价过大,  差价为: ${disparity}\t 差价超过: ${this.disparityLimit}\n`)
-            //     return;
-            // }
+            let disparity = ticker[0].ask - ticker[0].bid;
+            if (disparity > this.disparityLimit) {
+                console.log(`交易差价过大,  差价为: ${disparity}\t 差价超过: ${this.disparityLimit}\n`)
+                return;
+            }
             let rs = await this.buyAndSell({ price, quantity, type, symbol });
             console.log(`买入\n价格: ${price}\t买入数量: ${quantity}\t手续费: ${ratePrice}\t\n`, rs);
         }
