@@ -1,7 +1,7 @@
 import rp from 'request-promise';
 
 export default class MyReq{
-  static getJson(uri: string, body: object = {}, method: string = 'GET', params: any = { form: true }): Promise<any> {
+  static getJson(uri: string, body: object = {}, method: string = 'GET', params: any = { json: true }): Promise<any> {
     const opt: object = {
       method, uri,
       headers: {
@@ -20,14 +20,14 @@ export default class MyReq{
         case 'put':
         default:
           params.body = body;
+          params.form = body;
         break;
     }
 
-    return rp({ ...opt, ...params } ).then(res =>{
+    return rp({ ...opt, ...params }).then(res =>{
       return res;
     }, rej => {
       console.error(rej);
-
     }).catch(error => {
       console.error('Req#getJson 错误:\t', error.message);
     });
