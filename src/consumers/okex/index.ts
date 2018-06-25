@@ -1,5 +1,5 @@
-import Okex from './stratege1';
 import Koa from '../../lib/koa';
+import Okex from './strategy1';
 
 let users = {} as any;
 

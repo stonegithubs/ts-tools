@@ -8,11 +8,11 @@ export function getSortedKeys(obj: any = {}, fn?): string [] {
   return Object.keys(obj).sort(fn);
 }
 
-export function getType(obj: any) {
+export function getType(obj: any): string {
   let originType =  Object.prototype.toString.call(obj);
   return originType.substring(8, originType.length - 1);
 }
 
-export function wait(time) {
+export function wait(time): Promise<any> {
   return new Promise(res => setTimeout(res, time));
 }

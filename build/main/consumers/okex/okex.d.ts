@@ -6,7 +6,6 @@ export default class Okex extends WS {
     static apiRestUrl: string;
     fnQueue: object;
     constructor(api_key: string, secret_key: string, wsOpts?: any);
-    protected _buildSign(params?: any): string;
     _onmessage(msgEvent: any): void;
     wsPingPong(): void;
     wsAddChanel(channel: string, parameters?: any, fn?: any, event?: string): void;
@@ -22,4 +21,5 @@ export default class Okex extends WS {
     getUserInfo(): Promise<any>;
     getOrderInfo(coinFrom: any, coinTo: any, order_id: any): Promise<any>;
     doTrade(params: {}): Promise<any>;
+    protected _buildSign(params?: any): string;
 }

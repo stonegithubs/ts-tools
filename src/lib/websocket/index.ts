@@ -1,5 +1,3 @@
-/// <reference path="./ws.d.ts" />
-
 import WebSocket from 'ws';
 import { getType } from '../utils';
 
@@ -12,20 +10,20 @@ export default class WS extends WebSocket {
         this.onerror = this._onerror;
         this.onclose = this._onclose;
     }
-    _onopen() {
+    _onopen(): void {
         this.flushMsgQueue();
     }
-    _onmessage(msg?) {
-        // 
-        msg;
+    _onmessage(msg?): void {
+        //
+        msg = msg;
     }
-    _onerror(e) {
+    _onerror(e): void {
         console.log(e);
     }
-    _onclose(e) {
+    _onclose(e): void {
         console.log(e);
     }
-    send(msg, opts?, cb?) {
+    send(msg, opts?, cb?): void {
         msg = getType(msg) === 'Object' ? JSON.stringify(msg) : msg;
         if (this.readyState === this.OPEN) {
             super.send(msg, opts, cb);
@@ -33,7 +31,7 @@ export default class WS extends WebSocket {
             this.msgQueue.push({ msg, opts, cb });
         }
     }
-    flushMsgQueue() {
+    flushMsgQueue(): void {
         this.msgQueue.forEach(el => {
             super.send(el.msg, el.opt, el.cb);
         })

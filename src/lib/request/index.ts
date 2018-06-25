@@ -7,7 +7,7 @@ export default class MyReq{
       headers: {
         'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_1 like Mac OS X) AppleWebKit/603.1.30 (KHTML, like Gecko) Version/10.0 Mobile/14E304 Safari/602.1'
       },
-      // proxy: 'http://60.250.79.187:80'
+      // proxy: 'socks5://127.0.0.1:1086'
     }
 
     switch (method.toLowerCase()) {
@@ -26,8 +26,6 @@ export default class MyReq{
 
     return rp({ ...opt, ...params }).then(res =>{
       return res;
-    }, rej => {
-      console.error(rej);
     }).catch(error => {
       console.error('Req#getJson 错误:\t', error.message);
     });

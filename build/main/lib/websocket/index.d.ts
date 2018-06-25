@@ -1,4 +1,3 @@
-/// <reference path="../../../../src/lib/websocket/ws.d.ts" />
 import WebSocket from 'ws';
 export default class WS extends WebSocket {
     private msgQueue;

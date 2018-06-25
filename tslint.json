@@ -39,6 +39,8 @@
     "no-this-assignment": false,
     "no-parameter-reassignment": false,
     "no-if-statement": false,
-    "variable-name": false
+    "variable-name": false,
+    "curly": false,
+    "triple-equals": false
   }
 }

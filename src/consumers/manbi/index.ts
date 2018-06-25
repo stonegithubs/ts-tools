@@ -1,5 +1,5 @@
-import Manbi from './stratege1';
 import Koa from '../../lib/koa';
+import Manbi from './strategy1';
 
 let users = {} as any;
 

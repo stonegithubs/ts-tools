@@ -3,9 +3,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const manbi_1 = __importDefault(require("./manbi"));
-const util_1 = __importDefault(require("util"));
 const moment_1 = __importDefault(require("moment"));
+const util_1 = __importDefault(require("util"));
+const manbi_1 = __importDefault(require("./manbi"));
 class ManbiStratege1 extends manbi_1.default {
     constructor(apiid, secret, buyNum = 1, sellNum = 1, disparityLimit = 0.000002, timelimit = 4.5, taskInterval = 5) {
         super(apiid, secret);

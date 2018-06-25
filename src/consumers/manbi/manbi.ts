@@ -41,7 +41,7 @@ export default class Manbi{
     let rs = await this.getData('trade/order/open-orders', params);
     return rs;
   }
-  async cancelOrder(orderid) {
+  async cancelOrder(orderid): Promise<any> {
     let rs = await this.getData('trade/order/cancel', { orderid });
     return rs;
   }

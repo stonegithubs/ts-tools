@@ -1,8 +1,8 @@
-import Manbi from './manbi';
-import util from 'util';
 import moment from 'moment';
+import util from 'util';
+import Manbi from './manbi';
 
-export default class ManbiStratege1 extends Manbi {
+export default class ManbiStrategy1 extends Manbi {
     static rate = 1 / 1000;
     static symbol = 'conieth';
     static symbolBuy = 'conieth';
@@ -15,7 +15,7 @@ export default class ManbiStratege1 extends Manbi {
         // this.task();
         this.taskId = setInterval(() => this.task(), this.taskInterval * 1000);
     }
-    stop() {
+    stop(): void {
         clearInterval(this.taskId);
     }
     async task(): Promise<void> {
@@ -31,17 +31,17 @@ export default class ManbiStratege1 extends Manbi {
         if (availableETH > 0.01) {
             // buy
             // let price = ticker[0].ask;
-            
+
             // let price = this.buyNum == -1 ? ticker[0].ask : onlineOrders.orderbook.bids[this.buyNum - 1].price;
             // let price = ticker[0].bid;
             let bigBid = this.getOvertopCount(onlineOrders.orderbook.bids, 3, 10000); // 单量超过 1 万算大单
             let price = bigBid.price;
             let quantity: any = availableETH / price;
-            quantity = quantity / (1 + ManbiStratege1.rate);
+            quantity = quantity / (1 + ManbiStrategy1.rate);
             quantity = quantity.toString().match(/.*\..{2}/)[0];
-            let ratePrice = quantity * ManbiStratege1.rate;
+            let ratePrice = quantity * ManbiStrategy1.rate;
             let type = 'buy-limit';
-            let symbol = ManbiStratege1.symbolBuy;
+            let symbol = ManbiStrategy1.symbolBuy;
             let disparity = ticker[0].ask - ticker[0].bid;
             if (disparity > this.disparityLimit) {
                 console.log(`交易差价过大,  差价为: ${disparity}\t 差价超过: ${this.disparityLimit}\n`)
@@ -54,7 +54,7 @@ export default class ManbiStratege1 extends Manbi {
                 let order;
                 do{
                     try {
-                    order = await this.getOrderInfo(rs.orderid);  
+                    order = await this.getOrderInfo(rs.orderid);
                     await new Promise(res => setTimeout(() => res(), 2000));
                     } catch (error) {
                         //
@@ -64,7 +64,7 @@ export default class ManbiStratege1 extends Manbi {
                 let bigAsk = this.getOvertopCount(onlineOrders.orderbook.asks, 3, 10000); // 单量超过 1 万算大单
                 price = bigAsk.price;
                 type = 'sell-limit';
-                symbol = ManbiStratege1.symbolSell;
+                symbol = ManbiStrategy1.symbolSell;
                 rs = await this.buyAndSell({ price, quantity, type, symbol });
             }
             console.log(`买入\n价格: ${price}\t买入数量: ${quantity}\t手续费: ${ratePrice}\t\n`, rs);
@@ -79,17 +79,17 @@ export default class ManbiStratege1 extends Manbi {
             let price = this.sellNum == -1 ? ticker[0].bid : onlineOrders.orderbook.asks[this.sellNum - 1].price;
             // let price = ticker[0].ask;
             let quantity = balance.coni.available;
-            let ratePrice = quantity * ManbiStratege1.rate;
+            let ratePrice = quantity * ManbiStrategy1.rate;
             quantity = quantity.toString().match(/.*\..{2}/)[0];
             let type = 'sell-limit';
-            let symbol = ManbiStratege1.symbolSell;
+            let symbol = ManbiStrategy1.symbolSell;
             let rs = await this.buyAndSell({ price, quantity, type, symbol });
             console.log(`卖出\n价格: ${price}\t卖出数量: ${quantity}\t手续费: ${ratePrice}\t\n`, rs);
         }
         console.log(`\n循环一轮\n可用coni: ${availableCONI}\t可用eth: ${availableETH}\n`);
     }
     async processOrders(ticker: object): Promise<any> {
-        let myOrders = await this.getCurrentOrders({ symbol: ManbiStratege1.symbol });
+        let myOrders = await this.getCurrentOrders({ symbol: ManbiStrategy1.symbol });
         let now = moment(myOrders.timestamp);
         if (!myOrders.orders) return;
         myOrders = formatOrders(myOrders.orders.result);
@@ -126,7 +126,7 @@ export default class ManbiStratege1 extends Manbi {
     }
 
     // 获取大单的前一个单， 作为卖的价格
-    getOvertopCount(orderList: any[] = [], limit = 100000000, count = 10000) {
+    getOvertopCount(orderList: any[] = [], limit = 100000000, count = 10000): any {
         let rt: any;
         for(let index = 0,l = orderList.length; index < l; index++) {
             let el = orderList[index];
