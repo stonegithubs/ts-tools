@@ -27,6 +27,7 @@ export default class MyReq{
     return rp({ ...opt, ...params }).then(res =>{
       return res;
     }).catch(error => {
+      console.log(uri, body, method, params);
       console.error('Req#getJson 错误:\t', error.message);
     });
   }
