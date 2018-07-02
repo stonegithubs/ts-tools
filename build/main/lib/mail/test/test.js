@@ -19,7 +19,7 @@ let ms = new server_1.default({
         mailparser_1.simpleParser(stream, (err, mail) => {
             cb();
             assert_1.equal(err, null, '');
-            redis.publish('mailRecieved', JSON.stringify(mail));
+            redis.publish('mailReceived', JSON.stringify(mail));
         });
     }
 });
