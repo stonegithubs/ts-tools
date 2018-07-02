@@ -3,7 +3,9 @@ import Redis from 'ioredis';
 import { simpleParser } from 'mailparser';
 import MailServer from '../server';
 
-let redis = new Redis();
+let redis = new Redis({
+  password: '199381'
+});
 let ms = new MailServer({
   secure: false,
   hideSTARTTLS: true,
