@@ -4,6 +4,12 @@
     {
       "type": "node",
       "request": "launch",
+      "name": "other test",
+      "program": "${workspaceFolder}/build/main/tests/other.test.js"
+    },
+    {
+      "type": "node",
+      "request": "launch",
       "name": "mongoTest",
       "program": "${workspaceFolder}/build/main/lib/mongo/test/test.js"
     },
