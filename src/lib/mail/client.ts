@@ -1,15 +1,19 @@
-import smtp from 'smtp-protocol';
-import fs from 'fs';
+import nodemailer from 'nodemailer';
 
-smtp.connect('localhost', 9025, function (mail) {
-    console.log(111);
+let smtpConfig = {
+  host: '127.0.0.1',
+  port: 25,
+  secure: false
+};
 
-    mail.helo('example.com');
-    mail.from('substack@example.com');
-    mail.to('179817004@qq.com');
-    mail.data();
-    fs.createReadStream('./server.js').pipe(mail.message((err, code, lines) => {
-      console.log(err, code, lines);
-    }));
-    mail.quit();
-});
+let transporter = nodemailer.createTransport(smtpConfig)
+let message = {
+  from: 'sender@chosan.com',
+  to: '179817004@qq.com',
+  subject: 'Message title',
+  text: 'Plaintext version of the message',
+  html: '<p>HTML version of the message</p>'
+};
+transporter.sendMail(message, cb => {
+  console.log(cb);
+})

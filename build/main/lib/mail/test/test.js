@@ -3,22 +3,28 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const assert_1 = require("assert");
+const ioredis_1 = __importDefault(require("ioredis"));
+const mailparser_1 = require("mailparser");
 const server_1 = __importDefault(require("../server"));
-// import fs from 'fs';
-const mailparser2_1 = __importDefault(require("mailparser2"));
-let ms = new server_1.default();
-ms.on('to', (req, to, ack) => {
-    console.log('to', req.from, to);
-    ack.accept();
+let redis = new ioredis_1.default();
+let ms = new server_1.default({
+    secure: false,
+    hideSTARTTLS: true,
+    allowInsecureAuth: true,
+    authOptional: true,
+    onData(stream, session, cb) {
+        let tmp = session || cb;
+        tmp += tmp;
+        mailparser_1.simpleParser(stream, (err, mail) => {
+            cb();
+            assert_1.equal(err, null, '');
+            redis.publish('mailRecieved', JSON.stringify(mail));
+        });
+    }
 });
-ms.on('message', (req, stream, ack) => {
-    console.log(req.from + '\t' + req.to);
-    let mailparser = new mailparser2_1.default.MailParser2;
-    mailparser.on('end', data => {
-        console.log(data);
-    });
-    stream.pipe(mailparser);
-    ack.accept();
+ms.on('error', err => {
+    console.log(err);
 });
-ms.listen(9025);
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidGVzdC5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uLy4uL3NyYy9saWIvbWFpbC90ZXN0L3Rlc3QudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7Ozs7QUFBQSx1REFBbUM7QUFDbkMsdUJBQXVCO0FBQ3ZCLDhEQUFxQztBQUlyQyxJQUFJLEVBQUUsR0FBRyxJQUFJLGdCQUFVLEVBQUUsQ0FBQztBQUUxQixFQUFFLENBQUMsRUFBRSxDQUFDLElBQUksRUFBRSxDQUFDLEdBQUcsRUFBRSxFQUFFLEVBQUUsR0FBRyxFQUFFLEVBQUU7SUFDekIsT0FBTyxDQUFDLEdBQUcsQ0FBQyxJQUFJLEVBQUUsR0FBRyxDQUFDLElBQUksRUFBRSxFQUFFLENBQUMsQ0FBQztJQUNoQyxHQUFHLENBQUMsTUFBTSxFQUFFLENBQUM7QUFDakIsQ0FBQyxDQUFDLENBQUE7QUFHRixFQUFFLENBQUMsRUFBRSxDQUFDLFNBQVMsRUFBRSxDQUFDLEdBQUcsRUFBRSxNQUFNLEVBQUUsR0FBRyxFQUFFLEVBQUU7SUFDbEMsT0FBTyxDQUFDLEdBQUcsQ0FBQyxHQUFHLENBQUMsSUFBSSxHQUFHLElBQUksR0FBRyxHQUFHLENBQUMsRUFBRSxDQUFDLENBQUM7SUFDdEMsSUFBSSxVQUFVLEdBQUcsSUFBSSxxQkFBVSxDQUFDLFdBQVcsQ0FBQztJQUM1QyxVQUFVLENBQUMsRUFBRSxDQUFDLEtBQUssRUFBRSxJQUFJLENBQUMsRUFBRTtRQUN4QixPQUFPLENBQUMsR0FBRyxDQUFDLElBQUksQ0FBQyxDQUFDO0lBQ3RCLENBQUMsQ0FBQyxDQUFBO0lBQ0YsTUFBTSxDQUFDLElBQUksQ0FBQyxVQUFVLENBQUMsQ0FBQztJQUN4QixHQUFHLENBQUMsTUFBTSxFQUFFLENBQUM7QUFDakIsQ0FBQyxDQUFDLENBQUE7QUFFRixFQUFFLENBQUMsTUFBTSxDQUFDLElBQUksQ0FBQyxDQUFBIn0=
+ms.listen(25);
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidGVzdC5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uLy4uL3NyYy9saWIvbWFpbC90ZXN0L3Rlc3QudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7Ozs7QUFBQSxtQ0FBK0I7QUFDL0Isc0RBQTRCO0FBQzVCLDJDQUEwQztBQUMxQyx1REFBbUM7QUFFbkMsSUFBSSxLQUFLLEdBQUcsSUFBSSxpQkFBSyxFQUFFLENBQUM7QUFDeEIsSUFBSSxFQUFFLEdBQUcsSUFBSSxnQkFBVSxDQUFDO0lBQ3RCLE1BQU0sRUFBRSxLQUFLO0lBQ2IsWUFBWSxFQUFFLElBQUk7SUFDbEIsaUJBQWlCLEVBQUUsSUFBSTtJQUN2QixZQUFZLEVBQUUsSUFBSTtJQUNsQixNQUFNLENBQUMsTUFBTSxFQUFFLE9BQU8sRUFBRSxFQUFFO1FBQ3hCLElBQUksR0FBRyxHQUFHLE9BQU8sSUFBSSxFQUFFLENBQUM7UUFDeEIsR0FBRyxJQUFJLEdBQUcsQ0FBQztRQUNYLHlCQUFZLENBQUMsTUFBTSxFQUFFLENBQUMsR0FBRyxFQUFFLElBQUksRUFBRSxFQUFFO1lBQ2pDLEVBQUUsRUFBRSxDQUFDO1lBQ0wsY0FBSyxDQUFDLEdBQUcsRUFBRSxJQUFJLEVBQUUsRUFBRSxDQUFDLENBQUM7WUFDckIsS0FBSyxDQUFDLE9BQU8sQ0FBQyxjQUFjLEVBQUUsSUFBSSxDQUFDLFNBQVMsQ0FBQyxJQUFJLENBQUMsQ0FBQyxDQUFDO1FBQ3RELENBQUMsQ0FBQyxDQUFDO0lBQ0wsQ0FBQztDQUNGLENBQUMsQ0FBQztBQUVILEVBQUUsQ0FBQyxFQUFFLENBQUMsT0FBTyxFQUFFLEdBQUcsQ0FBQyxFQUFFO0lBQ25CLE9BQU8sQ0FBQyxHQUFHLENBQUMsR0FBRyxDQUFDLENBQUM7QUFDbkIsQ0FBQyxDQUFDLENBQUM7QUFFSCxFQUFFLENBQUMsTUFBTSxDQUFDLEVBQUUsQ0FBQyxDQUFDIn0=

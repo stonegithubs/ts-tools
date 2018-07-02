@@ -1,11 +1,8 @@
-/// <reference types="node" />
-import { Server } from 'net';
-export default class MailServer {
+/// <reference path="../../../../src/lib/mail/server.d.ts" />
+import { SMTPServer } from 'smtp-server';
+export default class MailServer extends SMTPServer {
     static instance: MailServer;
     msgList: any[];
-    server: Server;
-    constructor(fn?: any, opts?: {});
-    processMail(req: any): void;
-    on(message: any, fn: any): void;
-    listen(port?: number): void;
+    server: SMTPServer;
+    constructor(opts?: {});
 }

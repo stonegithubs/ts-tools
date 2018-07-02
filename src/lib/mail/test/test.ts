@@ -1,25 +1,27 @@
+import { equal } from 'assert';
+import Redis from 'ioredis';
+import { simpleParser } from 'mailparser';
 import MailServer from '../server';
-// import fs from 'fs';
-import MailParser from 'mailparser2';
 
+let redis = new Redis();
+let ms = new MailServer({
+  secure: false,
+  hideSTARTTLS: true,
+  allowInsecureAuth: true,
+  authOptional: true,
+  onData(stream, session, cb): void {
+    let tmp = session || cb;
+    tmp += tmp;
+    simpleParser(stream, (err, mail) => {
+      cb();
+      equal(err, null, '');
+      redis.publish('mailRecieved', JSON.stringify(mail));
+    });
+  }
+});
 
+ms.on('error', err => {
+  console.log(err);
+});
 
-let ms = new MailServer();
-
-ms.on('to', (req, to, ack) => {
-    console.log('to', req.from, to);
-    ack.accept();
-})
-
-
-ms.on('message', (req, stream, ack) => {
-    console.log(req.from + '\t' + req.to);
-    let mailparser = new MailParser.MailParser2;
-    mailparser.on('end', data => {
-        console.log(data);
-    })
-    stream.pipe(mailparser);
-    ack.accept();
-})
-
-ms.listen(9025)
+ms.listen(25);

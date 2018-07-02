@@ -41,6 +41,7 @@
     "no-if-statement": false,
     "variable-name": false,
     "curly": false,
-    "triple-equals": false
+    "triple-equals": false,
+    "no-unused-expression": false
   }
 }

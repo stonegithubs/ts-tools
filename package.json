@@ -54,15 +54,18 @@
   "dependencies": {
     "@koa/cors": "^2.2.1",
     "http-proxy": "^1.17.0",
+    "ioredis": "^3.2.2",
     "koa": "^2.5.1",
     "koa-bodyparser": "^4.2.1",
     "koa-router": "^7.4.0",
-    "mailparser2": "^1.0.0",
+    "mailparser": "^2.2.0",
     "moment": "^2.22.2",
+    "mongodb": "^3.1.0",
+    "nodemailer": "^4.6.7",
     "request": "^2.87.0",
     "request-promise": "^4.2.2",
     "sha.js": "^2.4.11",
-    "smtp-protocol": "^2.4.7",
+    "smtp-server": "^3.4.6",
     "ws": "^5.2.1"
   },
   "devDependencies": {
