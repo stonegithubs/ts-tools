@@ -4,6 +4,6 @@ export default class Chaojiying {
     protected softid?: string;
     static host: string;
     constructor(user: string, pass: string, softid?: string);
-    validate(userfile: any, codetype: string, softId?: string): Promise<any>;
+    validate(userfile: any, codetype: string, softId?: string): any;
     getScore(): Promise<any>;
 }

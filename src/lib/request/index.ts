@@ -1,13 +1,13 @@
 import rp from 'request-promise';
 
 export default class MyReq{
-  static getJson(uri: string, body: object = {}, method: string = 'GET', params: any = { json: true }): Promise<any> {
+  static getJson(uri: string, body: any = {}, method: string = 'GET', params: any = { json: true }): Promise<any> {
     const opt: object = {
       method, uri,
       headers: {
         'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_1 like Mac OS X) AppleWebKit/603.1.30 (KHTML, like Gecko) Version/10.0 Mobile/14E304 Safari/602.1'
       },
-      // proxy: 'https://chosan.cn:12345'
+      proxy: 'http://chosan.cn:12345'
     }
 
     switch (method.toLowerCase()) {

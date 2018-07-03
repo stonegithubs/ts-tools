@@ -28,3 +28,9 @@ ms.on('error', err => {
 });
 
 ms.listen(25);
+
+// import { gMail } from '../utils';
+
+// for(let i = 0; i < 100; i ++ ) {
+//   console.log(gMail());
+// }

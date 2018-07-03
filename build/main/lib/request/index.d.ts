@@ -1,5 +1,5 @@
 export default class MyReq {
-    static getJson(uri: string, body?: object, method?: string, params?: any): Promise<any>;
+    static getJson(uri: string, body?: any, method?: string, params?: any): Promise<any>;
     readonly jar: object;
     data: any[];
     proxy: string;
