@@ -1,7 +1,7 @@
-import rp from 'request-promise';
+import rq from 'request';
 
 export default class MyReq{
-  static getJson(uri: string, body: any = {}, method: string = 'GET', params: any = { json: true }): Promise<any> {
+  static getData(uri: string, body: any = {}, method: string = 'GET', params: any = { json: true }): Promise<any> {
     const opt: object = {
       method, uri,
       headers: {
@@ -24,31 +24,45 @@ export default class MyReq{
         break;
     }
 
-    return rp({ ...opt, ...params }).then(res =>{
-      return res;
-    }).catch(error => {
+    let result = new Promise((res, rej) => {
+      rq({ ...opt, ...params }, (err, response, data) => {
+        if (err) {
+          rej(err);
+        } else {
+          res(data);
+        }
+      })
+    })
+
+    result.catch(error => {
       console.log(uri, body, method, params);
       console.error('Req#getJson 错误:\t', error.message);
     });
+
+    return result;
   }
-  public readonly jar: object = rp.jar();  // 保存 cookie
+  static getJson(uri: string, body: any = {}, method: string = 'GET', params: any = { json: true }): Promise<any> {
+    let result = MyReq.getData(uri, body, method, params);
+    return result.then(data => typeof data === 'string' ? JSON.parse(data) : data);
+  }
+
+  public readonly jar: object = rq.jar();  // 保存 cookie
   public data: any[] = [];
   public proxy: string;
 
-  constructor() {
-    //
-  }
+  constructor(protected readonly baseURL: string = '', protected conf = { json: true }) {}
 
   async workFlow(uri: string, data: object = {}, method: string = 'GET', params: any = {}) : Promise<any> {
-    let { jar, proxy } = this;
+    let { conf, baseURL, jar, proxy } = this;
     const oParams = { ...params, jar, proxy };
     try {
-      let response = await MyReq.getJson(uri, data, method, oParams);
+      let response = await MyReq[(params.json || conf.json) ? 'getJson' : 'getData'](baseURL + uri, data, method, oParams);
       this.data.push(response);
+      return response;
     } catch (error) {
       console.error('Req#workFlow 错误:\t', error.message);
+      throw(error);
     }
-    return this;
   }
   setProxy (proxy: string): void {
     this.proxy = proxy;

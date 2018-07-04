@@ -2,15 +2,16 @@
 // import FormData from 'form-data';
 import request from 'request';
 import Req from '../request';
+import Requester from '../utils/declarations/requester';
 
-export default class Chaojiying{
-  static host: string = 'http://upload.chaojiying.net';
-
+export default class Chaojiying implements Requester{
+  static readonly baseURL: string = 'http://upload.chaojiying.net';
+  requester: Req = new Req(Chaojiying.baseURL);
   constructor(protected user: string, protected pass: string, protected softid?: string) {}
   validate(userfile: any, codetype: string, softId?: string): any {
     const { user, pass, softid = softId } = this;
     return new Promise((res, rej) => {
-      const rq = request.post(Chaojiying.host + '/Upload/Processing.php', (err, httpResponse, body): void => {
+      const rq = request.post(Chaojiying.baseURL + '/Upload/Processing.php', (err, httpResponse, body): void => {
         if (!err && httpResponse.statusCode === 200) {
           res(typeof body === 'string' ? JSON.parse(body) : body);
         } else {
@@ -26,7 +27,11 @@ export default class Chaojiying{
     })
   }
   getScore(): Promise<any> {
-    const { user, pass } = this;
-    return Req.getJson(Chaojiying.host + '/Upload/GetScore.php', { user, pass }, 'post');
+    const { user, pass, requester } = this;
+    return requester.workFlow('/Upload/GetScore.php', { user, pass }, 'post');
+  }
+  async reportError(id, softId?): Promise<any> {
+    const { user, pass, softid = softId, requester } = this;
+    return requester.workFlow('/Upload/ReportError.php', { user, pass, softid, id }, 'post');
   }
 }

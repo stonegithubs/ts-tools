@@ -2,20 +2,30 @@ import Redis from 'ioredis';
 import rq from 'request';
 import Chaojiying from '../../lib/chaojiying';
 import { gMail } from '../../lib/mail/utils';
-// import Req from '../../lib/request';
+import DZ from '../../lib/SMS/dz/';
+import { getRandomStr, throwError, wait } from '../../lib/utils';
 
-let redis = new Redis({
-  host: 'chosan.cn',
-  password: '199381'
-});
+//  --------- redis ---------
 
-redis.subscribe('mailReceived', (err, count) => {
-  if (err) {
-    throw new Error(err.message);
-  } else {
-    console.log(`当前第 ${count} 位订阅 mailReceived 的用户`);
-  }
-});
+const redis = new Redis({ host: 'chosan.cn', password: '199381' });
+
+redis.subscribe('mailReceived', (err, count) => err ? throwError(err.message) : console.log(`当前第 ${count} 位订阅 mailReceived 的用户`));
+
+//  --------- 超级鹰 ---------
+
+const cjy = new Chaojiying('179817004', 'Mailofchaojiying*', '896776');
+
+//  --------- DZ ---------
+
+const dz = new DZ('zhang179817004', 'qq179817004*', '46021');
+
+//  --------- 错误枚举类型 ---------
+
+enum ErrorType {
+  WrongPvilidCode = 1,   // 验证码识别错误
+}
+
+//  --------- Epnex ---------
 
 export default class Epnex {
   static baseUrl: string = 'https://epnex.io/api';
@@ -29,12 +39,14 @@ export default class Epnex {
   jar: any; // request cookie jar
   constructor(public invitation: string, public proxy: string = 'http://chosan.cn:12345') {}
 
-  getData(uri: string, form: any = {}): Promise<any> {
+  getData(uri: string, form: any = {}, params: any = {}): Promise<any> {
     let { baseUrl, commonHeader: headers } = Epnex;
     let { proxy, jar } = this;
     let url = baseUrl + uri;
     return new Promise((res, rej) => {
-      rq.post(url, { form, headers, proxy, jar }, (err, resp, body) => {
+      headers = { ...headers, ...params.header };
+      form = typeof form === 'string' ? form : JSON.stringify(form);
+      rq.post(url, { form, headers, proxy, jar, ...params }, (err, resp, body) => {
         if (err || resp.statusCode !== 200) {
           rej(err || resp.statusMessage);
         } else {
@@ -42,16 +54,13 @@ export default class Epnex {
         }
       })
     })
-
-    // .then(data => {
-    //   return typeof data === 'string' ? JSON.parse(data) : data;
-    // });
   }
+
+  // 使用邮箱和验证码注册账号
   async register(form: object): Promise<any> {
     if (form) {
       let { invitation } = this;
-      let user_password = 'Epnexio123';
-      let result = await this.getData('/Registered', JSON.stringify({ ...form, invitation, user_password }));
+      let result = await this.getData('/Registered', { invitation, ...form });
       if (result.errcode === 0 && result.result === 200) {
         return result;
       } else {
@@ -61,10 +70,12 @@ export default class Epnex {
       throw new Error('注册必要参数缺失！');
     }
   }
+
+  // 使用识别得到的图片验证码发送邮件, 获取邮箱验证码
   async getEmailValidCode(PvilidCode: string): Promise<any> {
     if (!PvilidCode) throw new Error('获取邮件验证码函数必要参数缺失！');
     let user_email = gMail();
-    let sendResult = await this.getData('/emailValidCode', JSON.stringify({ user_email, PvilidCode }));
+    let sendResult = await this.getData('/emailValidCode', { user_email, PvilidCode });
     return new Promise((res, rej) => {
       if (sendResult.errcode === 0 && sendResult.result === 200) {
         redis.on('message', (channel, message) => {
@@ -77,33 +88,91 @@ export default class Epnex {
           }
         });
       } else {
-        rej(`邮箱验证码发送失败!错误消息:\t${JSON.stringify(sendResult)}`);
+        rej({ message: '邮箱验证码发送失败!', errCode: ErrorType.WrongPvilidCode, result: sendResult });
       }
     })
   }
+
+  // 获取图片验证码, 使用超级鹰识别, 返回识别的验证码文本或抛出错误
   async getPvilidCode(): Promise<any> {
     let { baseUrl, commonHeader: headers } = Epnex;
     let { proxy } = this;
     let jar = this.jar = rq.jar();
-    let cjy = new Chaojiying('179817004', 'Mailofchaojiying*');
     let pic = rq(baseUrl + '/userValidateCode', { jar, proxy, headers });
-    let codeObj = await cjy.validate(pic, '1005', '896776');
+    let codeObj = await cjy.validate(pic, '1005');
     if (codeObj && codeObj.err_no === 0 && codeObj.err_str === 'OK') {
-      return codeObj.pic_str;
+      return codeObj;
     } else {
       throw new Error(codeObj && codeObj.err_str || '识别图片验证码错误!');
     }
   }
+
+  // 验证手机号
+  async validatePhone(form?): Promise<any> {
+    do {
+      let [ mobile ] = await dz.getMobileNums();
+      let params = { mobile, areaCode: '86', ...form };
+      let result = await this.getData('/mobileVerificationCode', params);
+      if (result.errcode === 0 && result.result === 200) {
+        let { message } = await dz.getMessageByMobile(mobile);
+        let phoneCode = message.match(/(\d+)/)[1];
+        let sendCodeResult = await this.getData('/bindpPhoneNumber', { phoneCode, ...params });
+        if (sendCodeResult.errcode === 0 && sendCodeResult.result === 200) {
+          // 注册成功
+          // 模拟 /selectUserPoster 进行分享
+          return { mobile };
+        }
+      } else if (result.errcode === 0 && result.result === 1) {  // 手机号已注册
+        dz.addIgnoreList(mobile);    // 手机号加黑
+      }
+    } while (await wait(2000, true));
+
+    // let { mobile, code } = await dz.getMessage()[0];
+    // let codeNum = code.match(/.*\|[^0-9]*(\d+)/)[1];
+    // 发送验证码
+  }
+
+  async login(form?): Promise<any> {
+    // let jar = this.jar = rq.jar();
+    return this.getData('/userLogin.do', form);
+  }
+
   async task(): Promise<any> {
-    try {
-      let pvCode = await this.getPvilidCode();
-      let emailAndCode = await this.getEmailValidCode(pvCode);
-      let regResult = await this.register(emailAndCode);
-      if (regResult.errcode === 0 && regResult.result === 200) {
-        // 注册成功，进行手机验证。
-      }  
-    } catch (error) {
-      console.error(error);
-    }
+    let dataHolds = {} as any;  // 用于记录 try 中的返回值, 在 catch 中可能用到
+    do {
+      try {
+        let { pic_str } = dataHolds.getPvilidCode = await this.getPvilidCode();
+        let emailAndCode = dataHolds.getEmailValidCode = await this.getEmailValidCode(pic_str);
+        let user_password = getRandomStr(12, 8);
+        let regResult = dataHolds.register = await this.register({ user_password, ...emailAndCode });
+        if (regResult.errcode === 0 && regResult.result === 200) {
+          // 注册成功, 执行登陆
+          let { user_email } = emailAndCode;
+          let loginData = dataHolds.login = await this.login({ user_password, user_email });
+          if (loginData && loginData.result === 200) {
+            let token = JSON.parse(loginData.data)[0].token;
+            // 模拟 /Initial
+            // 模拟 /updateInvition
+            // 模拟 https://epnex.io/static/js/countryzz.json
+
+            // 进行手机验证。
+            let phoneData = dataHolds.validatePhone = await this.validatePhone({ token, ...emailAndCode });
+            let { mobile } = phoneData;
+          }
+        }
+        break; // 程序无异常, 跳出 while 循环
+      } catch (error) {
+        if (error && error.result) {
+          console.log(error);
+          switch (error.errCode) {
+            case ErrorType.WrongPvilidCode:   // 验证码识别错误, 将错误反馈给超级鹰
+            cjy.reportError(dataHolds.getPvilidCode.pic_id);
+              break;
+            default:
+              break;
+          }
+        }
+      }
+    } while (await wait(1000, true));
   }
 }

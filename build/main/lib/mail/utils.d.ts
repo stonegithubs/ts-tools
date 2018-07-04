@@ -1,1 +1,1 @@
-export declare function gMail(suffix?: string, allowChars?: string[]): string;
+export declare function gMail(suffix?: (string | string[]), allowChars?: string[]): string;
