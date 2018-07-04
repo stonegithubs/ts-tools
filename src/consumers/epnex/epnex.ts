@@ -1,9 +1,12 @@
 import Redis from 'ioredis';
 import rq from 'request';
+import Mongo from '../../lib/mongo/';
 import Chaojiying from '../../lib/chaojiying';
 import { gMail } from '../../lib/mail/utils';
 import DZ from '../../lib/SMS/dz/';
 import { getRandomStr, throwError, wait } from '../../lib/utils';
+import XunDaili, { dynamicForwardURL } from '../../lib/proxy/xundaili';
+import fs from 'fs';
 
 //  --------- redis ---------
 
@@ -19,6 +22,14 @@ const cjy = new Chaojiying('179817004', 'Mailofchaojiying*', '896776');
 
 const dz = new DZ('zhang179817004', 'qq179817004*', '46021');
 
+//  --------- MongoDB ---------
+
+const xdl = new XunDaili({ orderno: 'ZF2018744533NVHTc0', secret: '944417ea359346e4ad882483cb63c13c' });
+
+//  --------- MongoDB ---------
+
+const mongo = new Mongo();
+
 //  --------- 错误枚举类型 ---------
 
 enum ErrorType {
@@ -33,20 +44,22 @@ export default class Epnex {
     'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
     Host: 'epnex.io',
     Origin: 'https://epnex.io',
-    Referer: 'https://epnex.io/phoneSelf_sign.html?i=00VHmxY&lan=0',
+    Referer: 'https://epnex.io/phoneSelf_sign.html?i=00TPBBT&lan=0',
     'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_1 like Mac OS X) AppleWebKit/603.1.30 (KHTML, like Gecko) Version/10.0 Mobile/14E304 Safari/602.1'
   };
   jar: any; // request cookie jar
-  constructor(public invitation: string, public proxy: string = 'http://chosan.cn:12345') {}
+  proxy: string = dynamicForwardURL;
+  constructor(public invitation: string) {}
 
   getData(uri: string, form: any = {}, params: any = {}): Promise<any> {
     let { baseUrl, commonHeader: headers } = Epnex;
     let { proxy, jar } = this;
-    let url = baseUrl + uri;
+    // let url = baseUrl + uri;
+    let url = uri;
     return new Promise((res, rej) => {
-      headers = { ...headers, ...params.header };
+      headers = xdl.wrapHeader({ ...headers, ...params.header });
       form = typeof form === 'string' ? form : JSON.stringify(form);
-      rq.post(url, { form, headers, proxy, jar, ...params }, (err, resp, body) => {
+      rq.post(url, { form, headers, proxy, jar, rejectUnauthorized: false, ...params }, function (err, resp, body) {
         if (err || resp.statusCode !== 200) {
           rej(err || resp.statusMessage);
         } else {
@@ -98,7 +111,16 @@ export default class Epnex {
     let { baseUrl, commonHeader: headers } = Epnex;
     let { proxy } = this;
     let jar = this.jar = rq.jar();
-    let pic = rq(baseUrl + '/userValidateCode', { jar, proxy, headers });
+    headers = xdl.wrapHeader(headers);
+    let pic = rq(baseUrl + '/userValidateCode', { jar, proxy //: 'http://chosan.cn:12345'
+    ,  headers, rejectUnauthorized: false, tunnel: false });
+    pic.on('error', e => {
+      console.log(e);
+    })
+    pic.on('data', m => {
+      console.log(m);
+      
+    })
     let codeObj = await cjy.validate(pic, '1005');
     if (codeObj && codeObj.err_no === 0 && codeObj.err_str === 'OK') {
       return codeObj;
@@ -126,10 +148,6 @@ export default class Epnex {
         dz.addIgnoreList(mobile);    // 手机号加黑
       }
     } while (await wait(2000, true));
-
-    // let { mobile, code } = await dz.getMessage()[0];
-    // let codeNum = code.match(/.*\|[^0-9]*(\d+)/)[1];
-    // 发送验证码
   }
 
   async login(form?): Promise<any> {
@@ -137,6 +155,8 @@ export default class Epnex {
   }
 
   async task(): Promise<any> {
+    this.getData('https://chosan.cn');
+    return;
     let dataHolds = {} as any;  // 用于记录 try 中的返回值, 在 catch 中可能用到
     do {
       try {
@@ -156,7 +176,8 @@ export default class Epnex {
 
             // 进行手机验证。
             let phoneData = dataHolds.validatePhone = await this.validatePhone({ token, ...emailAndCode });
-            let { mobile } = phoneData;
+            let col = await mongo.getCollection('epnex', 'regists');
+            col.insertOne({ user_email, user_password, ...phoneData });
           }
         }
         break; // 程序无异常, 跳出 while 循环

@@ -1,4 +1,4 @@
-import Mongo from '../client';
+import Mongo from '../index';
 
 new Mongo().getCollection('posts', 'posts').then(col => {
   col.find({}).toArray((err, docs) => {
