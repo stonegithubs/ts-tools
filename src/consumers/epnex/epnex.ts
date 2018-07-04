@@ -133,7 +133,6 @@ export default class Epnex {
   }
 
   async login(form?): Promise<any> {
-    // let jar = this.jar = rq.jar();
     return this.getData('/userLogin.do', form);
   }
 
