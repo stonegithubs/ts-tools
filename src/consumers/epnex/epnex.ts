@@ -7,6 +7,8 @@ import DZ from '../../lib/SMS/dz/';
 import { getRandomStr, throwError, wait } from '../../lib/utils';
 import XunDaili, { dynamicForwardURL } from '../../lib/proxy/xundaili';
 import fs from 'fs';
+import HttpsProxyAgent from 'https-proxy-agent'; //第三方包,请安装
+import { parse } from 'url';
 
 //  --------- redis ---------
 
@@ -54,12 +56,14 @@ export default class Epnex {
   getData(uri: string, form: any = {}, params: any = {}): Promise<any> {
     let { baseUrl, commonHeader: headers } = Epnex;
     let { proxy, jar } = this;
-    // let url = baseUrl + uri;
-    let url = uri;
+    let url = baseUrl + uri;
+    // let url = uri;
     return new Promise((res, rej) => {
       headers = xdl.wrapHeader({ ...headers, ...params.header });
+      let agent = new HttpsProxyAgent({ ...parse(proxy), headers });
+
       form = typeof form === 'string' ? form : JSON.stringify(form);
-      rq.post(url, { form, headers, proxy, jar, rejectUnauthorized: false, ...params }, function (err, resp, body) {
+      rq.post(url, { form, headers, jar, rejectUnauthorized: false, agent, ...params }, function (err, resp, body) {
         if (err || resp.statusCode !== 200) {
           rej(err || resp.statusMessage);
         } else {
@@ -112,15 +116,16 @@ export default class Epnex {
     let { proxy } = this;
     let jar = this.jar = rq.jar();
     headers = xdl.wrapHeader(headers);
-    let pic = rq(baseUrl + '/userValidateCode', { jar, proxy //: 'http://chosan.cn:12345'
-    ,  headers, rejectUnauthorized: false, tunnel: false });
-    pic.on('error', e => {
-      console.log(e);
-    })
-    pic.on('data', m => {
-      console.log(m);
+    let agent = new HttpsProxyAgent({ ...parse(proxy), headers });
+    let pic = rq(baseUrl + '/userValidateCode', { jar //, proxy //: 'http://chosan.cn:12345'
+    ,  headers, rejectUnauthorized: false, agent });
+    // pic.on('error', e => {
+    //   console.log(e);
+    // })
+    // pic.on('data', m => {
+    //   console.log(m+'');
       
-    })
+    // })
     let codeObj = await cjy.validate(pic, '1005');
     if (codeObj && codeObj.err_no === 0 && codeObj.err_str === 'OK') {
       return codeObj;
@@ -155,8 +160,8 @@ export default class Epnex {
   }
 
   async task(): Promise<any> {
-    this.getData('https://chosan.cn');
-    return;
+    // this.getData('https://chosan.cn');
+    // return;
     let dataHolds = {} as any;  // 用于记录 try 中的返回值, 在 catch 中可能用到
     do {
       try {
