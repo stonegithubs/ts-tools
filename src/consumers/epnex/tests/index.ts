@@ -26,7 +26,7 @@ export default `
 <body>
   <form action="/t" method="post">
     <label for="yqm">
-      邀请码(或者邀请链接): <input type="text" name='yqm' placeholder="邀请链接或邀请码,邀请码如:00TPBBT">
+      邀请码(或者邀请链接): <input type="text" name='yqm' placeholder="邀请链接或邀请码,邀请码如:00TPBBT,请仔细确认,填错无法更改">
     </label>
     <label for="count">
       邀请次数: <input type="text" name='count' value="" placeholder="小于200的整数">
