@@ -58,7 +58,7 @@ export default class Epnex {
       form = typeof form === 'string' ? form : JSON.stringify(form);
       rq.post(url, xdl.wrapParams({ form, headers, jar }), (err, resp, body) => {
         if (err || resp.statusCode !== 200) {
-          log(err, resp, body, 'error');
+          log(err, resp.statusCode, body, 'error');
           rej(err || resp.statusMessage);
         } else {
           res(typeof body === 'string' ? JSON.parse(body) : body);
@@ -111,12 +111,12 @@ export default class Epnex {
     let jar = this.jar = rq.jar();
     let params = xdl.wrapParams({ jar,  headers });
     let pic = rq(baseUrl + '/userValidateCode', params);
-    pic.on('error', e => {
-      log(e, 'error');
-    })
-    pic.on('data', m => {
-      log(m+'');
-    })
+    // pic.on('error', e => {
+    //   log(e, 'error');
+    // })
+    // pic.on('data', m => {
+    //   log(m+'');
+    // })
     let codeObj = await cjy.validate(pic, '1005');
     if (codeObj && codeObj.err_no === 0 && codeObj.err_str === 'OK') {
       return codeObj;
