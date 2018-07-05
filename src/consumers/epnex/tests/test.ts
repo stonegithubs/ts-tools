@@ -33,7 +33,8 @@ new Koa([
         return ctx.body = '注册频率必须大于等于 1 的整数';
       }
       if (~yqm.indexOf('http')) {
-        yqm = yqm.match(/i=([0-9a-zA-Z]+)/)[1];
+        let match = yqm.match(/i=([0-9a-zA-Z]+)/);
+        yqm = match && match[1];
       }
       if (yqm) {
         //  || '00TPBBT'
@@ -54,7 +55,7 @@ new Koa([
       return '';
     }
   }
-]).listen(80);
+]).listen(8889);
 
 async function doTask(ctx, yqm, count = 20, interval):Promise<any> {
   let permission = await hasPermission(ctx);
