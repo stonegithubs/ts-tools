@@ -67,3 +67,9 @@ export function getRandomStr(maxLen: number = 20, minLen: number = 1, chars = ge
   }
   return str;
 }
+
+export function log(...rest): void{
+  let method = rest[rest.length - 1];
+  method = console.hasOwnProperty(method) ? rest.pop() : 'log';
+  console[method].apply({}, [ new Date().toLocaleString(), '\n', ...rest ]);
+}

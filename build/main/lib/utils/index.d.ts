@@ -8,3 +8,4 @@ export declare function getRandom(max?: number, min?: number, integer?: any): nu
 export declare function getRandomInt(max?: number, min?: number): number;
 export declare function getDefaultChars(): string[];
 export declare function getRandomStr(maxLen?: number, minLen?: number, chars?: string[]): string;
+export declare function log(...rest: any[]): void;

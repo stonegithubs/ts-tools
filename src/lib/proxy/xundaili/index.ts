@@ -7,8 +7,12 @@ export const dynamicForwardURL = 'http://forward.xdaili.cn:80';
 export default class XunDaili {
   static dynamicForwardURL: 'http://forward.xdaili.cn:80';
   static wrapHeader(headers: any = {}, params: { orderno; secret }): object {
-      headers['Proxy-Authorization'] = XunDaili.getProxyAuthorizationSign(params).strProxyAuthorization;
+    headers['Proxy-Authorization'] = XunDaili.getProxyAuthorizationSign(params).strProxyAuthorization;
     return headers;
+  }
+  static getAgent(params?: object): object {
+    let { host, port } = new URL(dynamicForwardURL);
+    return new HttpsProxyAgent({ ...params, host, port });
   }
   static getProxyAuthorizationSign(params?): any {
     let { orderno, secret, timestamp = parseInt(String(Date.now() / 1000), 10) } = params;

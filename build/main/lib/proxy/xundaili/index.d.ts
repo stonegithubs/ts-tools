@@ -6,6 +6,7 @@ export default class XunDaili {
         orderno: any;
         secret: any;
     }): object;
+    static getAgent(params?: object): object;
     static getProxyAuthorizationSign(params?: any): any;
     constructor(config?: any);
     dynamicForward(): void;

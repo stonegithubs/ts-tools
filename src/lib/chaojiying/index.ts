@@ -1,8 +1,11 @@
 // import fs from 'fs';
 // import FormData from 'form-data';
 import request from 'request';
+import XunDaili from '../proxy/xundaili';
 import Req from '../request';
 import Requester from '../utils/declarations/requester';
+
+const xdl = new XunDaili({ orderno: 'ZF2018730302kdQRPU', secret: '944417ea359346e4ad882483cb63c13c' }); // ZF2018744533NVHTc0 ZF2018730302kdQRPU
 
 export default class Chaojiying implements Requester{
   static readonly baseURL: string = 'http://upload.chaojiying.net';

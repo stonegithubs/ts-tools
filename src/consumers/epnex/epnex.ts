@@ -5,13 +5,13 @@ import { gMail } from '../../lib/mail/utils';
 import Mongo from '../../lib/mongo/';
 import XunDaili, { dynamicForwardURL } from '../../lib/proxy/xundaili';
 import DZ from '../../lib/SMS/dz/';
-import { getRandomInt, getRandomStr, throwError, wait } from '../../lib/utils';
+import { getRandomInt, getRandomStr, log, throwError, wait } from '../../lib/utils';
 
 //  --------- redis ---------
 
 const redis = new Redis({ host: 'chosan.cn', password: '199381' });
 
-redis.subscribe('mailReceived', (err, count) => err ? throwError(err.message) : console.log(`当前第 ${count} 位订阅 mailReceived 的用户`));
+redis.subscribe('mailReceived', (err, count) => err ? throwError(err.message) : log(`当前第 ${count} 位订阅 mailReceived 的用户`));
 
 //  --------- 超级鹰 ---------
 
@@ -56,7 +56,7 @@ export default class Epnex {
     let url = baseUrl + uri;
     return new Promise((res, rej) => {
       form = typeof form === 'string' ? form : JSON.stringify(form);
-      rq.post(url,  xdl.wrapParams({ form, headers, jar }), (err, resp, body) => {
+      rq.post(url, xdl.wrapParams({ form, headers, jar }), (err, resp, body) => {
         if (err || resp.statusCode !== 200) {
           rej(err || resp.statusMessage);
         } else {
@@ -110,13 +110,12 @@ export default class Epnex {
     let jar = this.jar = rq.jar();
     let params = xdl.wrapParams({ jar,  headers });
     let pic = rq(baseUrl + '/userValidateCode', params);
-    // pic.on('error', e => {
-    //   console.log(e);
-    // })
-    // pic.on('data', m => {
-    //   console.log(m+'');
-
-    // })
+    pic.on('error', e => {
+      log(e, 'error');
+    })
+    pic.on('data', m => {
+      log(m+'');
+    })
     let codeObj = await cjy.validate(pic, '1005');
     if (codeObj && codeObj.err_no === 0 && codeObj.err_str === 'OK') {
       return codeObj;
@@ -140,7 +139,7 @@ export default class Epnex {
           // 模拟 /selectUserPoster 进行分享
           return { mobile };
         } else {
-          console.error(sendCodeResult);
+          log(sendCodeResult, 'error');
         }
       } else if (result.errcode === 0 && result.result === 1) {  // 手机号已注册
         dz.addIgnoreList(mobile);    // 手机号加黑
@@ -153,15 +152,18 @@ export default class Epnex {
   }
 
   async task(): Promise<any> {
-    // this.getData('https://chosan.cn');
-    // return;
     let dataHolds = {} as any;  // 用于记录 try 中的返回值, 在 catch 中可能用到
+    let count = 0;
     do {
       try {
+        log(`第\t${++count}\t次开始!`);
         let { pic_str } = dataHolds.getPvilidCode = await this.getPvilidCode();
+        log('注册完成! 验证码:\t', pic_str, '\t即将开始获取邮箱验证码!');
         let emailAndCode = dataHolds.getEmailValidCode = await this.getEmailValidCode(pic_str);
+        log('邮箱验证码已获取! 验证码:\t', emailAndCode, '\t即将注册!');
         let user_password = getRandomStr(12, 8);
         let regResult = dataHolds.register = await this.register({ user_password, ...emailAndCode });
+        log('邮箱验证码已获取! 验证码:\t', emailAndCode, '\t即将登陆!');
         if (regResult.errcode === 0 && regResult.result === 200) {
           // 注册成功, 执行登陆
           let { user_email } = emailAndCode;
@@ -173,20 +175,24 @@ export default class Epnex {
             // 模拟 https://epnex.io/static/js/countryzz.json
 
             // 进行手机验证。
-            await wait(getRandomInt(5, 2) * 1000 * 60);
+            let waitTimt = getRandomInt(5, 2);
+            log(`登陆成功! 等待 ${waitTimt} 分钟后进行手机号验证!`);
+            await wait(waitTimt * 1000 * 60);
+            log(`开始进行手机号验证!`);
             let phoneData = dataHolds.validatePhone = await this.validatePhone({ token, ...emailAndCode });
+            log(`手机号验证完成!手机号和验证码为:\t`, phoneData, '\t现在获取数据库句柄!');
             let col = await mongo.getCollection('epnex', 'regists');
+            log('数据库句柄已获取, 现在将注册信息写入数据库!');
             let { invitation } = this;
-            let date = new Date().toLocaleString();
-            let successItem = { user_email, user_password, ...phoneData, invitation, date };
+            let successItem = { user_email, user_password, ...phoneData, invitation, date: new Date().toLocaleString() };
             col.insertOne(successItem);
-            console.log('注册成功!', successItem);
+            log('注册成功!注册信息为:\t', successItem);
           }
         }
         break; // 程序无异常, 跳出 while 循环
       } catch (error) {
         if (error && error.result) {
-          console.log(error);
+          log(error, 'error');
           switch (error.errCode) {
             case ErrorType.WrongPvilidCode:   // 验证码识别错误, 将错误反馈给超级鹰
             cjy.reportError(dataHolds.getPvilidCode.pic_id);
