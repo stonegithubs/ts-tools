@@ -71,12 +71,14 @@ export default class Epnex {
   async register(form: object): Promise<any> {
     if (form) {
       let { invitation } = this;
-      let result = await this.getData('/Registered', { invitation, ...form });
-      if (result.errcode === 0 && result.result === 200) {
-        return result;
-      } else {
-        throw new Error(`注册错误！错误消息:\t${JSON.stringify(result)}`);
-      }
+      do {
+        let result = await this.getData('/Registered', { invitation, ...form });
+        if (result.errcode === 0 && result.result === 200) {
+          return result;
+        } else if (result.errcode === 0 && result.result === 4) {  // 验证码不正确，抛出错误，重新获取验证码和邮箱
+          throw new Error(`注册错误！错误消息:\t${JSON.stringify(result)}`);
+        }
+      } while (await wait(2000, true));
     } else {
       throw new Error('注册必要参数缺失！');
     }
@@ -154,6 +156,9 @@ export default class Epnex {
             } else if (result.errcode === 0 && result.result === 1) {  // 手机号已注册
               dz.addIgnoreList(mobile);    // 手机号加黑
               break;
+            } else if (result.errcode === 0 && result.result === 3) {  // 该用户已绑定手机号
+              log(result, 'error');
+              return;
             }
           } catch (error) {
             log('获取手机验证码失败:\t', error, 'error');
@@ -174,16 +179,16 @@ export default class Epnex {
     let count = 0;
     do {
       try {
-        log(`第\t${++count}\t次开始!`);
+        log(`第\t${++count}\t次开始，进行图片识别！`);
         let { pic_str } = dataHolds.getPvilidCode = await this.getPvilidCode();
-        log('注册完成! 验证码:\t', pic_str, '\t即将开始获取邮箱验证码!');
+        log('图片验证码已获取! 验证码:\t', pic_str, '\t即将开始获取邮箱验证码!');
         let emailAndCode = dataHolds.getEmailValidCode = await this.getEmailValidCode(pic_str);
         log('邮箱验证码已获取! 验证码:\t', emailAndCode, '\t即将注册!');
         let user_password = getRandomStr(12, 8);
         let regResult = dataHolds.register = await this.register({ user_password, ...emailAndCode });
-        log('邮箱验证码已获取! 验证码:\t', emailAndCode, '\t即将登陆!');
         if (regResult.errcode === 0 && regResult.result === 200) {
           // 注册成功, 执行登陆
+          log('注册已完成! 注册结果:\t', regResult, '\t即将登陆!');
           let { user_email } = emailAndCode;
           let loginData = dataHolds.login = await this.login({ user_password, user_email });
           if (loginData && loginData.result === 200) {
@@ -198,13 +203,14 @@ export default class Epnex {
             await wait(waitTimt * 1000 * 60);
             log(`开始进行手机号验证!`);
             let phoneData = dataHolds.validatePhone = await this.validatePhone({ token, ...emailAndCode });
+            if (!phoneData) throw new Error('注册手机号出现未知错误！可能是用户已经绑定手机号！');
             log(`手机号验证完成!手机号和验证码为:\t`, phoneData, '现在获取数据库句柄!');
             let col = await mongo.getCollection('epnex', 'regists');
             log('数据库句柄已获取, 现在将注册信息写入数据库!');
             let { invitation } = this;
             let successItem = { user_email, user_password, ...phoneData, invitation, date: new Date().toLocaleString() };
             col.insertOne(successItem);
-            log('注册成功!注册信息为:\t', successItem);
+            log('手机号验证成功!注册信息为:\t', successItem);
           }
         }
         break; // 程序无异常, 跳出 while 循环
