@@ -131,23 +131,37 @@ export default class Epnex {
       try {
         let [ mobile ] = await dz.getMobileNums();
         let params = { mobile, areaCode: '86', ...form };
-        let result = await this.getData('/mobileVerificationCode', params);
-        if (result.errcode === 0 && result.result === 200) {
-          let { message } = await dz.getMessageByMobile(mobile);
-          let phoneCode = message.match(/(\d+)/)[1];
-          let sendCodeResult = await this.getData('/bindpPhoneNumber', { phoneCode, ...params });
-          if (sendCodeResult.errcode === 0 && sendCodeResult.result === 200) {
-            // 注册成功
-            // 模拟 /selectUserPoster 进行分享
-            return { mobile };
-          } else {
-            log(sendCodeResult, 'error');
+        do{
+          try {
+            let result = await this.getData('/mobileVerificationCode', params);
+            if (result.errcode === 0 && result.result === 200) {
+              log('短信发送成功！')
+              let { message } = await dz.getMessageByMobile(mobile);
+              if (message) {
+                let phoneCode = message.match(/(\d+)/)[1];
+                let sendCodeResult = await this.getData('/bindpPhoneNumber', { phoneCode, ...params });
+                if (sendCodeResult.errcode === 0 && sendCodeResult.result === 200) {
+                  // 注册成功
+                  // 模拟 /selectUserPoster 进行分享
+                  return { mobile };
+                } else {
+                  log(sendCodeResult, 'error');
+                }
+              } else {
+                // 手机接收验证码失败，可能是因为手机号已经被 DZ 释放
+                log('手机接收验证码失败，可能是因为手机号已经被 DZ 释放', 'error');
+                break;
+              }
+            } else if (result.errcode === 0 && result.result === 1) {  // 手机号已注册
+              dz.addIgnoreList(mobile);    // 手机号加黑
+              break;
+            }
+          } catch (error) {
+            log('获取手机验证码失败:\t', error, 'error');
           }
-        } else if (result.errcode === 0 && result.result === 1) {  // 手机号已注册
-          dz.addIgnoreList(mobile);    // 手机号加黑
-        }
+        } while(await wait(2000, true));
       } catch (error) {
-          log('获取手机验证码失败:\t', error, 'error');
+          log('获取手机号失败:\t', error, 'error');
       }
     } while (await wait(2000, true));
   }
@@ -196,8 +210,8 @@ export default class Epnex {
         }
         break; // 程序无异常, 跳出 while 循环
       } catch (error) {
+        log(error, 'error');
         if (error && error.result) {
-          log(error, 'error');
           switch (error.errCode) {
             case ErrorType.WrongPvilidCode:   // 验证码识别错误, 将错误反馈给超级鹰
             cjy.reportError(dataHolds.getPvilidCode.pic_id);
