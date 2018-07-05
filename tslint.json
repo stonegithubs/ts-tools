@@ -45,6 +45,7 @@
     "no-unused-expression": false,
     "no-reference": false,
     "one-variable-per-declaration": false,
-    "no-bitwise": false
+    "no-bitwise": false,
+    "no-string-literal": false
   }
 }
