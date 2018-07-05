@@ -198,7 +198,7 @@ export default class Epnex {
             await wait(waitTimt * 1000 * 60);
             log(`开始进行手机号验证!`);
             let phoneData = dataHolds.validatePhone = await this.validatePhone({ token, ...emailAndCode });
-            log(`手机号验证完成!手机号和验证码为:\t`, phoneData, '\t现在获取数据库句柄!');
+            log(`手机号验证完成!手机号和验证码为:\t`, phoneData, '现在获取数据库句柄!');
             let col = await mongo.getCollection('epnex', 'regists');
             log('数据库句柄已获取, 现在将注册信息写入数据库!');
             let { invitation } = this;
