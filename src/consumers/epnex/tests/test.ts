@@ -24,10 +24,14 @@ new Koa([
     path: '/t',
     cb: async ctx => {
       let { yqm, count, inviteCode, interval } = ctx.request.body;
-      count = parseInt(count, 2);
-      interval = parseInt(interval, 2);
-      count = count > 200 ? 150 : 150;
-      interval = interval < 1 ? 1 : interval;
+      count = parseInt(count, 10);
+      interval = parseInt(interval, 10);
+      if (count != count || count < 1 || count > 200) {
+        return ctx.body = '邀请次数必须大于 1 小于 200 的整数';
+      }
+      if (interval != interval || interval < 1) {
+        return ctx.body = '注册频率必须大于等于 1 的整数';
+      }
       if (~yqm.indexOf('http')) {
         yqm = yqm.match(/i=([0-9a-zA-Z]+)/)[1];
       }
@@ -36,7 +40,7 @@ new Koa([
         if (YQM[yqm]) {
           ctx.body = '该邀请码已经使用! 如需继续操作, 请返回之前页面!'
         } else {
-          if (interval !== undefined || interval > 1) {
+          if (interval !== undefined && interval >= 1) {
             YQM[yqm] = true;
             let permission = await doTask(ctx, yqm, count, interval);
             ctx.body = permission.result ? '添加成功!, 如需继续操作, 请返回之前页面!' : permission.message;
@@ -47,6 +51,7 @@ new Koa([
       } else {
         ctx.body = '请输入邀请码! 如需继续操作, 请返回之前页面!'
       }
+      return '';
     }
   }
 ]).listen(80);
