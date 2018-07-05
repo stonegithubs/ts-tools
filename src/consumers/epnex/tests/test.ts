@@ -9,6 +9,7 @@ new Koa([
     cb: ctx => {
       //
       // ctx.body = fs.readFileSync('./index.html');
+      console.log('开始执行');
       let ep = new Epnex('00TPBBT');
       ep.task();
     }
