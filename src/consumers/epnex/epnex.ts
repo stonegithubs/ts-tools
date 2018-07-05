@@ -210,7 +210,7 @@ export default class Epnex {
             let { invitation } = this;
             let successItem = { user_email, user_password, ...phoneData, invitation, date: new Date().toLocaleString() };
             col.insertOne(successItem);
-            log('手机号验证成功!注册信息为:\t', successItem);
+            log('注册流程完成! 注册信息为:\t', successItem, 'warn');
           }
         }
         break; // 程序无异常, 跳出 while 循环

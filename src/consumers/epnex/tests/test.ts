@@ -1,7 +1,7 @@
 import fs from 'fs';
 import Koa from '../../../lib/koa';
 import Mongo from '../../../lib/mongo/';
-import { getRandomInt } from '../../../lib/utils';
+import { getRandomInt, log } from '../../../lib/utils';
 import Epnex from '../epnex';
 import indexHtml from './index';
 
@@ -68,10 +68,13 @@ async function doTask(ctx, yqm, count = 20, interval):Promise<any> {
       setTimeout(() => {
         doTask(ctx, yqm, count, interval);
       }, randomTime * 1000 * 60);
+    } else {
+      YQM[yqm] = false;
+      log('最后一次开始！', 'warn');
     }
   } else {
     YQM[yqm] = false;
-    console.error(permission.message);
+    log(permission.message, 'error');
   }
   return permission;
 }

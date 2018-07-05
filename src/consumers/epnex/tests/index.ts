@@ -54,6 +54,7 @@ export default `
   <br>
   <br>
   <img src="https://posts-1256188574.cos.ap-chengdu.myqcloud.com/luyhmk/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20180705234946.png" alt="案例">
+  <img src="https://posts-1256188574.cos.ap-chengdu.myqcloud.com/luyhmk/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20180706023928.png">
 </body>
 </html>
 `
