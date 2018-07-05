@@ -1,16 +1,27 @@
+import fs from 'fs';
 import Koa from '../../../lib/koa';
 import Epnex from '../epnex';
 
-let ep = new Epnex('00TPBBT');
-
-ep.task();
-
 new Koa([
   {
-    method: 'post', path: '/', cb: (ctx) => {
+    method: 'get',
+    path: '/',
+    cb: ctx => {
+      //
+      // ctx.body = fs.readFileSync('./index.html');
+      let ep = new Epnex('00TPBBT');
+      ep.task();
+    }
+  },
+  {
+    method: 'post',
+    path: '/',
+    cb: ctx => {
       console.log(ctx);
+
+      // let ep = new Epnex('00TPBBT');
+
+      // ep.task();
     }
   }
 ]).listen(8889);
-
-

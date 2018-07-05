@@ -27,7 +27,7 @@ export default class ClientManager{
       if (con) {
         return res(con);
       } else {
-        MongoClient.connect(url, (err, conn) => {
+        MongoClient.connect(url, { useNewUrlParser: true }, (err, conn) => {
           if (err) return rej(err);
           console.log("Connected successfully to server");
           connections.set(url, conn);

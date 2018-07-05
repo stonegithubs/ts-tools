@@ -4978,7 +4978,7 @@ typescript@2.7.2:
 
 typescript@^2.9.1:
   version "2.9.2"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-2.9.2.tgz#1cbf61d05d6b96269244eb6a3bce4bd914e0f00c"
+  resolved "http://registry.npm.taobao.org/typescript/download/typescript-2.9.2.tgz#1cbf61d05d6b96269244eb6a3bce4bd914e0f00c"
 
 uc.micro@^1.0.1:
   version "1.0.5"

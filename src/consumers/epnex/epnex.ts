@@ -1,14 +1,11 @@
 import Redis from 'ioredis';
 import rq from 'request';
-import Mongo from '../../lib/mongo/';
 import Chaojiying from '../../lib/chaojiying';
 import { gMail } from '../../lib/mail/utils';
+import Mongo from '../../lib/mongo/';
+import XunDaili, { dynamicForwardURL } from '../../lib/proxy/xundaili';
 import DZ from '../../lib/SMS/dz/';
 import { getRandomStr, throwError, wait } from '../../lib/utils';
-import XunDaili, { dynamicForwardURL } from '../../lib/proxy/xundaili';
-import fs from 'fs';
-import HttpsProxyAgent from 'https-proxy-agent'; //第三方包,请安装
-import { parse } from 'url';
 
 //  --------- redis ---------
 
@@ -53,17 +50,13 @@ export default class Epnex {
   proxy: string = dynamicForwardURL;
   constructor(public invitation: string) {}
 
-  getData(uri: string, form: any = {}, params: any = {}): Promise<any> {
+  getData(uri: string, form: any = {}): Promise<any> {
     let { baseUrl, commonHeader: headers } = Epnex;
     let { proxy, jar } = this;
     let url = baseUrl + uri;
-    // let url = uri;
     return new Promise((res, rej) => {
-      headers = xdl.wrapHeader({ ...headers, ...params.header });
-      let agent = new HttpsProxyAgent({ ...parse(proxy), headers });
-
       form = typeof form === 'string' ? form : JSON.stringify(form);
-      rq.post(url, { form, headers, jar, rejectUnauthorized: false, agent, ...params }, function (err, resp, body) {
+      rq.post(url,  xdl.wrapParams({ form, headers, jar }), (err, resp, body) => {
         if (err || resp.statusCode !== 200) {
           rej(err || resp.statusMessage);
         } else {
@@ -115,16 +108,14 @@ export default class Epnex {
     let { baseUrl, commonHeader: headers } = Epnex;
     let { proxy } = this;
     let jar = this.jar = rq.jar();
-    headers = xdl.wrapHeader(headers);
-    let agent = new HttpsProxyAgent({ ...parse(proxy), headers });
-    let pic = rq(baseUrl + '/userValidateCode', { jar //, proxy //: 'http://chosan.cn:12345'
-    ,  headers, rejectUnauthorized: false, agent });
+    let params = xdl.wrapParams({ jar,  headers });
+    let pic = rq(baseUrl + '/userValidateCode', params);
     // pic.on('error', e => {
     //   console.log(e);
     // })
     // pic.on('data', m => {
     //   console.log(m+'');
-      
+
     // })
     let codeObj = await cjy.validate(pic, '1005');
     if (codeObj && codeObj.err_no === 0 && codeObj.err_str === 'OK') {
