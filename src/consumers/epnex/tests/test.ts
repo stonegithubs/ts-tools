@@ -12,6 +12,7 @@ new Koa([
       console.log('开始执行');
       let ep = new Epnex('00TPBBT');
       ep.task();
+      ctx.body = '开始执行';
     }
   },
   {
