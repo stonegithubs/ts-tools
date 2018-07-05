@@ -98,7 +98,7 @@ export default class Epnex {
           }
         });
       } else {
-        rej({ message: '邮箱验证码发送失败!', errCode: ErrorType.WrongPvilidCode, result: sendResult });
+        rej({ message: '邮箱验证码发送失败!', errCode: ErrorType.WrongPvilidCode, result: { ...sendResult, date: new Date().toLocaleString() } });
       }
     })
   }
@@ -177,7 +177,8 @@ export default class Epnex {
             let phoneData = dataHolds.validatePhone = await this.validatePhone({ token, ...emailAndCode });
             let col = await mongo.getCollection('epnex', 'regists');
             let { invitation } = this;
-            let successItem = { user_email, user_password, ...phoneData, invitation };
+            let date = new Date().toLocaleString();
+            let successItem = { user_email, user_password, ...phoneData, invitation, date };
             col.insertOne(successItem);
             console.log('注册成功!', successItem);
           }
