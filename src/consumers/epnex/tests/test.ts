@@ -59,6 +59,8 @@ async function doTask(ctx, yqm, count, interval):Promise<any> {
         doTask(ctx, yqm, count, interval);
       }, randomTime * 1000 * 60);
     }
+  } else {
+    console.error(permission.message);
   }
   return permission;
 }

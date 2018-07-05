@@ -179,8 +179,7 @@ export default class Epnex {
             let { invitation } = this;
             let successItem = { user_email, user_password, ...phoneData, invitation };
             col.insertOne(successItem);
-            console.log(successItem);
-
+            console.log('注册成功!', successItem);
           }
         }
         break; // 程序无异常, 跳出 while 循环

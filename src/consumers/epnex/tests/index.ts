@@ -40,7 +40,7 @@ export default `
     <button type="submit">提交</button>
   </form>
  <br>
-   <p class="tip">tip: 请提交之后几分钟查看是否注册成功</p>
+   <p class="tip">tip: 请提交之后几分钟查看是否注册成功, 账号注册成功之后, 会在 2-5 分钟之间随机进行手机号验证, 在这期间账户奖励将处于冻结状态</p>
  <br>
   后期可开放查看邀请注册的所有记录的账号、密码、验证手机号
 </body>
