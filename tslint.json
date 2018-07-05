@@ -44,6 +44,7 @@
     "triple-equals": false,
     "no-unused-expression": false,
     "no-reference": false,
-    "one-variable-per-declaration": false
+    "one-variable-per-declaration": false,
+    "no-bitwise": false
   }
 }

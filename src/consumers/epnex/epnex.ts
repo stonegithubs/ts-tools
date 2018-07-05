@@ -5,7 +5,7 @@ import { gMail } from '../../lib/mail/utils';
 import Mongo from '../../lib/mongo/';
 import XunDaili, { dynamicForwardURL } from '../../lib/proxy/xundaili';
 import DZ from '../../lib/SMS/dz/';
-import { getRandomStr, throwError, wait } from '../../lib/utils';
+import { getRandomInt, getRandomStr, throwError, wait } from '../../lib/utils';
 
 //  --------- redis ---------
 
@@ -23,7 +23,7 @@ const dz = new DZ('zhang179817004', 'qq179817004*', '46021');
 
 //  --------- MongoDB ---------
 
-const xdl = new XunDaili({ orderno: 'ZF2018744533NVHTc0', secret: '944417ea359346e4ad882483cb63c13c' });
+const xdl = new XunDaili({ orderno: 'ZF2018730302kdQRPU', secret: '944417ea359346e4ad882483cb63c13c' }); // ZF2018744533NVHTc0 ZF2018730302kdQRPU
 
 //  --------- MongoDB ---------
 
@@ -139,6 +139,8 @@ export default class Epnex {
           // 注册成功
           // 模拟 /selectUserPoster 进行分享
           return { mobile };
+        } else {
+          console.error(sendCodeResult);
         }
       } else if (result.errcode === 0 && result.result === 1) {  // 手机号已注册
         dz.addIgnoreList(mobile);    // 手机号加黑
@@ -171,9 +173,14 @@ export default class Epnex {
             // 模拟 https://epnex.io/static/js/countryzz.json
 
             // 进行手机验证。
+            await wait(getRandomInt(5, 2) * 1000 * 60);
             let phoneData = dataHolds.validatePhone = await this.validatePhone({ token, ...emailAndCode });
             let col = await mongo.getCollection('epnex', 'regists');
-            col.insertOne({ user_email, user_password, ...phoneData });
+            let { invitation } = this;
+            let successItem = { user_email, user_password, ...phoneData, invitation };
+            col.insertOne(successItem);
+            console.log(successItem);
+
           }
         }
         break; // 程序无异常, 跳出 while 循环
