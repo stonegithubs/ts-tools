@@ -52,7 +52,7 @@ export default class Epnex {
 
   getData(uri: string, form: any = {}): Promise<any> {
     let { baseUrl, commonHeader: headers } = Epnex;
-    let { proxy, jar } = this;
+    let { jar } = this;
     let url = baseUrl + uri;
     return new Promise((res, rej) => {
       form = typeof form === 'string' ? form : JSON.stringify(form);
@@ -107,7 +107,6 @@ export default class Epnex {
   // 获取图片验证码, 使用超级鹰识别, 返回识别的验证码文本或抛出错误
   async getPvilidCode(): Promise<any> {
     let { baseUrl, commonHeader: headers } = Epnex;
-    let { proxy } = this;
     let jar = this.jar = rq.jar();
     let params = xdl.wrapParams({ jar,  headers });
     let pic = rq(baseUrl + '/userValidateCode', params);
