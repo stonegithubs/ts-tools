@@ -58,6 +58,7 @@ export default class Epnex {
       form = typeof form === 'string' ? form : JSON.stringify(form);
       rq.post(url, xdl.wrapParams({ form, headers, jar }), (err, resp, body) => {
         if (err || resp.statusCode !== 200) {
+          log(err, resp, body, 'error');
           rej(err || resp.statusMessage);
         } else {
           res(typeof body === 'string' ? JSON.parse(body) : body);
