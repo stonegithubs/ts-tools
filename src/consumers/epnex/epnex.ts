@@ -128,22 +128,26 @@ export default class Epnex {
   // 验证手机号
   async validatePhone(form?): Promise<any> {
     do {
-      let [ mobile ] = await dz.getMobileNums();
-      let params = { mobile, areaCode: '86', ...form };
-      let result = await this.getData('/mobileVerificationCode', params);
-      if (result.errcode === 0 && result.result === 200) {
-        let { message } = await dz.getMessageByMobile(mobile);
-        let phoneCode = message.match(/(\d+)/)[1];
-        let sendCodeResult = await this.getData('/bindpPhoneNumber', { phoneCode, ...params });
-        if (sendCodeResult.errcode === 0 && sendCodeResult.result === 200) {
-          // 注册成功
-          // 模拟 /selectUserPoster 进行分享
-          return { mobile };
-        } else {
-          log(sendCodeResult, 'error');
+      try {
+        let [ mobile ] = await dz.getMobileNums();
+        let params = { mobile, areaCode: '86', ...form };
+        let result = await this.getData('/mobileVerificationCode', params);
+        if (result.errcode === 0 && result.result === 200) {
+          let { message } = await dz.getMessageByMobile(mobile);
+          let phoneCode = message.match(/(\d+)/)[1];
+          let sendCodeResult = await this.getData('/bindpPhoneNumber', { phoneCode, ...params });
+          if (sendCodeResult.errcode === 0 && sendCodeResult.result === 200) {
+            // 注册成功
+            // 模拟 /selectUserPoster 进行分享
+            return { mobile };
+          } else {
+            log(sendCodeResult, 'error');
+          }
+        } else if (result.errcode === 0 && result.result === 1) {  // 手机号已注册
+          dz.addIgnoreList(mobile);    // 手机号加黑
         }
-      } else if (result.errcode === 0 && result.result === 1) {  // 手机号已注册
-        dz.addIgnoreList(mobile);    // 手机号加黑
+      } catch (error) {
+          log('获取手机验证码失败:\t', error, 'error');
       }
     } while (await wait(2000, true));
   }
