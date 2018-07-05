@@ -24,6 +24,10 @@ new Koa([
     path: '/t',
     cb: async ctx => {
       let { yqm, count, inviteCode, interval } = ctx.request.body;
+      count = parseInt(count, 2);
+      interval = parseInt(interval, 2);
+      count = count > 200 ? 150 : 150;
+      interval = interval < 1 ? 1 : interval;
       if (~yqm.indexOf('http')) {
         yqm = yqm.match(/i=([0-9a-zA-Z]+)/)[1];
       }
@@ -47,7 +51,7 @@ new Koa([
   }
 ]).listen(80);
 
-async function doTask(ctx, yqm, count, interval):Promise<any> {
+async function doTask(ctx, yqm, count = 20, interval):Promise<any> {
   let permission = await hasPermission(ctx);
   if (permission.result) {
     let ep = new Epnex(yqm);  // '00TPBBT'
@@ -60,6 +64,7 @@ async function doTask(ctx, yqm, count, interval):Promise<any> {
       }, randomTime * 1000 * 60);
     }
   } else {
+    YQM[yqm] = false;
     console.error(permission.message);
   }
   return permission;
@@ -71,7 +76,7 @@ async function hasPermission(ctx): Promise<any> {
 
   let col = await mongo.getCollection('epnex', 'inviteCode');
   let inviteInfo = await col.findOne({ code: inviteCode });
-
+  console.log(`邀请次数:\t${inviteInfo && inviteInfo.remain}`);
   if (inviteInfo && inviteInfo.remain > 0) {
     col.updateOne({code: inviteCode}, {$set: { remain: inviteInfo.remain - 1}});
     return  {
