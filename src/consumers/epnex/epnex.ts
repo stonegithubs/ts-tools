@@ -192,15 +192,29 @@ export default class Epnex {
           let { user_email } = emailAndCode;
           let loginData = dataHolds.login = await this.login({ user_password, user_email });
           if (loginData && loginData.result === 200) {
-            let token = JSON.parse(loginData.data)[0].token;
-            // 模拟 /Initial
-            // 模拟 /updateInvition
-            // 模拟 https://epnex.io/static/js/countryzz.json
-
+            let loginInfo = JSON.parse(loginData.data)[0];
+            let token = loginInfo.token;
             // 进行手机验证。
             let waitTimt = getRandomInt(5, 2);
             log(`登陆成功! 等待 ${waitTimt} 分钟后进行手机号验证!`);
             await wait(waitTimt * 1000 * 60);
+
+            try {
+              // 以下为模拟用户操作, 不关心是否成功!
+              // 模拟 /Initial
+              await this.getData('/Initial', loginInfo);
+              // 模拟 /updateInvition
+              await this.getData('/updateInvition', loginInfo);
+              // 模拟 /selectUserPoster 进行分享
+              await this.getData('/updateInvition', loginInfo);
+              // 模拟 /UserSgin 用户签到
+              await this.getData('/UserSgin', loginInfo);
+              // 模拟 https://epnex.io/static/js/countryzz.json
+            }
+            catch (error) {
+              log('模拟分享等错误, 无需关注! 错误消息:\t', error, 'error');
+            }
+
             log(`开始进行手机号验证!`);
             let phoneData = dataHolds.validatePhone = await this.validatePhone({ token, ...emailAndCode });
             if (!phoneData) throw new Error('注册手机号出现未知错误！可能是用户已经绑定手机号！');
