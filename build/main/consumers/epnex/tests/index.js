@@ -37,7 +37,7 @@ exports.default = `
       邀请次数: <input type="text" name='count' value="" placeholder="小于200的整数">
     </label>
     <label for="inviteCode">
-      脚本注册码: <input type="text" name='inviteCode' value="" placeholder="微信联系chosan179817004加群">
+      脚本注册码: <input type="text" name='inviteCode' value="" placeholder="往下滑动扫码加微信加群">
     </label>
     <label for="interval">
      注册频率(单位:分钟): <input type="text" name='interval' value="" placeholder="此项可不填,则随机2-10分钟注册一次">
