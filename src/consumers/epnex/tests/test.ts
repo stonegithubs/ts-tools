@@ -54,7 +54,7 @@ new Koa([
       return '';
     }
   }
-]).listen(8889);
+]).listen(80);
 
 async function doTask(inviteCode, yqm, count = 20, interval):Promise<any> {
   let permission = await hasPermission(inviteCode);
