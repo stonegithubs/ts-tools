@@ -21,7 +21,7 @@ const cjy = new Chaojiying('179817004', 'Mailofchaojiying*', '896776');
 
 const dz = new DZ('zhang179817004', 'qq179817004*', '46021');
 
-//  --------- MongoDB ---------
+//  --------- XunDaili ---------
 
 const xdl = new XunDaili({ orderno: 'ZF2018730302kdQRPU', secret: '944417ea359346e4ad882483cb63c13c' }); // ZF2018744533NVHTc0 ZF2018730302kdQRPU
 
@@ -33,6 +33,13 @@ const mongo = new Mongo();
 
 enum ErrorType {
   WrongPvilidCode = 1,   // 验证码识别错误
+}
+
+enum ErrorValidatePhone{
+  PhoneUsed = 1,  // 手机号已注册
+  TokenExpire,  // token 错误或过期
+  HasBindPhone,  // 邮箱已绑定手机号
+  OK = 200
 }
 
 //  --------- Epnex ---------
@@ -48,16 +55,19 @@ export default class Epnex {
   };
   jar: any; // request cookie jar
   proxy: string = dynamicForwardURL;
+  user_email: string;
+  user_password: string = getRandomStr(12, 8);
+  token: any;
   constructor(public invitation: string) {}
 
-  getData(uri: string, form: any = {}): Promise<any> {
+  getData(uri: string, form: any = {}, method = 'post'): Promise<any> {
     let { baseUrl, commonHeader: headers } = Epnex;
     let { jar } = this;
     let url = baseUrl + uri;
     return new Promise((res, rej) => {
       form = typeof form === 'string' ? form : JSON.stringify(form);
-      rq.post(url, xdl.wrapParams({ form, headers, jar }), (err, resp, body) => {
-        if (err || resp.statusCode !== 200) {
+      rq[method](url, xdl.wrapParams({ form, headers, jar }), (err, resp, body) => {
+        if (err || (resp && resp.statusCode !== 200)) {
           log(err, resp.statusCode, body, 'error');
           rej(err || resp.statusMessage);
         } else {
@@ -132,100 +142,129 @@ export default class Epnex {
       try {
         let [ mobile ] = await dz.getMobileNums();
         let params = { mobile, areaCode: '86', ...form };
-        do{
-          try {
-            let result = await this.getData('/mobileVerificationCode', params);
-            if (result.errcode === 0 && result.result === 200) {
-              log('短信发送成功！')
-              let { message } = await dz.getMessageByMobile(mobile);
-              if (message) {
-                let phoneCode = message.match(/(\d+)/)[1];
-                let sendCodeResult = await this.getData('/bindpPhoneNumber', { phoneCode, ...params });
-                if (sendCodeResult.errcode === 0 && sendCodeResult.result === 200) {
-                  // 注册成功
-                  // 模拟 /selectUserPoster 进行分享
-                  return { mobile };
-                } else {
-                  log(sendCodeResult, 'error');
+        doValidateBegin: {
+          do{
+            try {
+              let result = await this.getData('/mobileVerificationCode', params);
+              if (result.errcode === 0) {
+                switch (result.result) {
+                  case ErrorValidatePhone.PhoneUsed:
+                    dz.addIgnoreList(mobile);    // 手机号加黑, 不再获取该手机号
+                    break doValidateBegin;
+                  case ErrorValidatePhone.TokenExpire:  // token 过期
+                  // 重新登录获取 token
+                    await this.login();
+                    continue;
+                  case ErrorValidatePhone.HasBindPhone:  // 邮箱已绑定手机号
+                    log(result, 'error');
+                    return;
+                  case ErrorValidatePhone.OK:  // 成功
+                    log('短信发送成功！');
+                    let { message } = await dz.getMessageByMobile(mobile);
+                    if (message) {
+                      let phoneCode = message.match(/(\d+)/)[1];
+                      let sendCodeResult = await this.getData('/bindpPhoneNumber', { phoneCode, ...params });
+                      if (sendCodeResult.errcode === 0 && sendCodeResult.result === 200) {
+                        // 注册成功
+                        return { mobile };
+                      } else {
+                        log(sendCodeResult, 'error');
+                        break; // 避免 switch 隐式贯穿
+                      }
+                    } else {
+                      // 手机接收验证码失败，可能是因为手机号已经被 DZ 释放
+                      log('手机接收验证码失败，可能是因为手机号已经被 DZ 释放', 'error');
+                      break doValidateBegin;
+                    }
+                  default:
+                    break;
                 }
-              } else {
-                // 手机接收验证码失败，可能是因为手机号已经被 DZ 释放
-                log('手机接收验证码失败，可能是因为手机号已经被 DZ 释放', 'error');
-                break;
               }
-            } else if (result.errcode === 0 && result.result === 1) {  // 手机号已注册
-              dz.addIgnoreList(mobile);    // 手机号加黑
-              break;
-            } else if (result.errcode === 0 && result.result === 3) {  // 该用户已绑定手机号
-              log(result, 'error');
-              return;
+            } catch (error) {
+              log('获取手机验证码失败:\t', error, 'error');
             }
-          } catch (error) {
-            log('获取手机验证码失败:\t', error, 'error');
-          }
-        } while(await wait(2000, true));
+          } while(await wait(2000, true));
+        }
       } catch (error) {
           log('获取手机号失败:\t', error, 'error');
       }
     } while (await wait(2000, true));
   }
 
-  async login(form?): Promise<any> {
-    return this.getData('/userLogin.do', form);
+  async login(user_email = this.user_email, user_password = this.user_password): Promise<any> {
+    // 邮箱和密码 100 % 正确, 因此此处可以使用 while 保证不会因为网络错误导致登录失败;
+    do {
+      try {
+        let loginResult = await this.getData('/userLogin.do', { user_email, user_password });
+        if (loginResult && loginResult.result === 200) {
+          let loginInfo = JSON.parse(loginResult.data)[0];
+          this.token = loginInfo.token;
+          return loginResult;
+        }
+      } catch (error) {
+          log('登录错误! 错误信息:\t', error, 'error');
+      }
+    } while (await wait(2000, true));
   }
 
   async task(): Promise<any> {
     let dataHolds = {} as any;  // 用于记录 try 中的返回值, 在 catch 中可能用到
-    let count = 0;
+    let roundTrip = 0;
+    let { invitation } = this;
     do {
       try {
-        log(`第\t${++count}\t次开始，进行图片识别！`);
+        log(`第\t${++roundTrip}\t次开始，进行图片识别！`);
         let { pic_str } = dataHolds.getPvilidCode = await this.getPvilidCode();
         log('图片验证码已获取! 验证码:\t', pic_str, '\t即将开始获取邮箱验证码!');
         let emailAndCode = dataHolds.getEmailValidCode = await this.getEmailValidCode(pic_str);
         log('邮箱验证码已获取! 验证码:\t', emailAndCode, '\t即将注册!');
-        let user_password = getRandomStr(12, 8);
+        let { user_password } = this;
         let regResult = dataHolds.register = await this.register({ user_password, ...emailAndCode });
         if (regResult.errcode === 0 && regResult.result === 200) {
           // 注册成功, 执行登陆
           log('注册已完成! 注册结果:\t', regResult, '\t即将登陆!');
           let { user_email } = emailAndCode;
-          let loginData = dataHolds.login = await this.login({ user_password, user_email });
-          if (loginData && loginData.result === 200) {
-            let loginInfo = JSON.parse(loginData.data)[0];
-            let token = loginInfo.token;
-            // 进行手机验证。
-            let waitTimt = getRandomInt(5, 2);
-            log(`登陆成功! 等待 ${waitTimt} 分钟后进行手机号验证!`);
-            await wait(waitTimt * 1000 * 60);
+          this.user_email = user_email;
+          this.user_password = user_password;
+          let colNotValidatePhone = await mongo.getCollection('epnex', 'notValidate');  // 写入已注册未认证数据, 如果认证完成, 则删除.
+          await colNotValidatePhone.insertOne({ user_password, user_email, invitation });
+          let loginData = dataHolds.login = await this.login();
+          // 进行手机验证。
+          let waitTimt = getRandomInt(5, 2);
+          log(`登陆成功! 等待 ${waitTimt} 分钟后进行手机号验证!`);
+          await wait(waitTimt * 1000 * 60);
 
-            try {
-              // 以下为模拟用户操作, 不关心是否成功!
-              // 模拟 /Initial
-              await this.getData('/Initial', loginInfo);
-              // 模拟 /updateInvition
-              await this.getData('/updateInvition', loginInfo);
-              // 模拟 /selectUserPoster 进行分享
-              await this.getData('/updateInvition', loginInfo);
-              // 模拟 /UserSgin 用户签到
-              await this.getData('/UserSgin', loginInfo);
-              // 模拟 https://epnex.io/static/js/countryzz.json
-            }
-            catch (error) {
-              log('模拟分享等错误, 无需关注! 错误消息:\t', error, 'error');
-            }
-
-            log(`开始进行手机号验证!`);
-            let phoneData = dataHolds.validatePhone = await this.validatePhone({ token, ...emailAndCode });
-            if (!phoneData) throw new Error('注册手机号出现未知错误！可能是用户已经绑定手机号！');
-            log(`手机号验证完成!手机号和验证码为:\t`, phoneData, '现在获取数据库句柄!');
-            let col = await mongo.getCollection('epnex', 'regists');
-            log('数据库句柄已获取, 现在将注册信息写入数据库!');
-            let { invitation } = this;
-            let successItem = { user_email, user_password, ...phoneData, invitation, date: new Date().toLocaleString() };
-            col.insertOne(successItem);
-            log('注册流程完成! 注册信息为:\t', successItem, 'warn');
+          try {
+            // 以下为模拟用户操作, 不关心是否成功!
+            let loginInfo = JSON.parse(loginData.data)[0];   // 包含 token 等信息, 作模拟用户操作时的认证参数
+            // 模拟 /Initial
+            await this.getData('/Initial', loginInfo);
+            // 模拟 /updateInvition
+            await this.getData('/updateInvition', loginInfo);
+            // 模拟 /selectUserPoster 进行分享
+            await this.getData('/updateInvition', loginInfo);
+            // 模拟获取分享海报 http://jxs-epn.oss-cn-hongkong.aliyuncs.com/epn/img/179817004@qq.com01C.png
+            await this.getData(`http://jxs-epn.oss-cn-hongkong.aliyuncs.com/epn/img/${user_email}01C.png`, {}, 'get');
+            // 模拟 /UserSgin 用户签到
+            await this.getData('/UserSgin', loginInfo);
+            // 模拟 https://epnex.io/static/js/countryzz.json
           }
+          catch (error) {
+            log('模拟分享等错误, 无需关注! 错误消息:\t', error, 'error');
+          }
+
+          log(`开始进行手机号验证!`);
+          let { token } = this;
+          let phoneData = dataHolds.validatePhone = await this.validatePhone({ token, ...emailAndCode });
+          if (!phoneData) throw new Error('注册手机号出现未知错误！可能是用户已经绑定手机号！');
+          log(`手机号验证完成!手机号和验证码为:\t`, phoneData, '将未认证手机号的记录从未认证数据库集合中删除');
+          await colNotValidatePhone.deleteOne({ user_email });
+          log('现在获取数据库句柄!')
+          let col = await mongo.getCollection('epnex', 'regists');
+          log('数据库句柄已获取, 现在将注册信息写入数据库!');
+          let successItem = { user_email, user_password, ...phoneData, invitation, date: new Date().toLocaleString() };
+          col.insertOne(successItem);
+          log('注册流程完成! 注册信息为:\t', successItem, 'warn');
         }
         break; // 程序无异常, 跳出 while 循环
       } catch (error) {

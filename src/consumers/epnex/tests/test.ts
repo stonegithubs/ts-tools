@@ -8,8 +8,6 @@ let YQM = {};
 
 let mongo = new Mongo();
 
-resume();
-
 new Koa([
   {
     method: 'get',
@@ -54,7 +52,7 @@ new Koa([
       return '';
     }
   }
-]).listen(80);
+]).listen(8889);
 
 async function doTask(inviteCode, yqm, count = 20, interval):Promise<any> {
   let permission = await hasPermission(inviteCode);
@@ -113,7 +111,10 @@ async function resume(): Promise<any> {
   if (uInfos && uInfos.length) {
     uInfos.forEach(uinfo => {
       log('启动任务成功, 用户信息!', uinfo, 'warn');
-      uinfo.count > 0 && doTask(uinfo.inviteCode, uinfo.yqm, uinfo.count, uinfo.interval);
+      if (uinfo.count > 0) {
+        YQM[uinfo.yqm] = true;
+        doTask(uinfo.inviteCode, uinfo.yqm, uinfo.count, uinfo.interval);
+      }
     });
   } else {
     log('没有正在运行的用户信息!', 'warn');

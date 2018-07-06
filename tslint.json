@@ -46,6 +46,7 @@
     "no-reference": false,
     "one-variable-per-declaration": false,
     "no-bitwise": false,
-    "no-string-literal": false
+    "no-string-literal": false,
+    "label-position": false
   }
 }
