@@ -226,8 +226,16 @@ export default class Epnex {
       // http://jxs-epn.oss-cn-hongkong.aliyuncs.com/epn/img/rWviQ2TI5e@mln.kim01E.png
       let sharePngInfo = await this.getData('/selectUserPoster', loginInfo);
       let pngs = JSON.parse(sharePngInfo.data)[0];
-      await this.getData(pngs.Cuser_headPortrait1, {}, 'get');
-      await this.getData(pngs.Euser_headPortrait1, {}, 'get');
+      try {
+        await this.getData(pngs.Cuser_headPortrait1, {}, 'get');
+      } catch (error) {
+        log('C用户分享错误', error, 'error');
+      }
+      try {
+        await this.getData(pngs.Euser_headPortrait1, {}, 'get');
+      } catch (error) {
+        log('E用户分享错误', error, 'error');
+      }
     } catch (error) {
       log('模拟分享等错误, 无需关注! 错误消息:\t', error, 'error');
     }
