@@ -11,7 +11,7 @@ mongo.getCollection('epnex', 'regists').then(col => {
         count++;
         log(`当前第\t${count}\t条数据`);
         let ep = new Epnex(item.invitation);  // '00TPBBT'
-        let randTime = getRandomInt(3600);
+        let randTime = getRandomInt(20);
         log(`将在\t${randTime}\t秒钟之后模拟用户操作！`);
 
         setTimeout(async () => {

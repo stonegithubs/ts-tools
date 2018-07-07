@@ -64,7 +64,7 @@ export default class Epnex {
   getData(uri: string, form: any = {}, method = 'post'): Promise<any> {
     let { baseUrl, commonHeader: headers } = Epnex;
     let { jar } = this;
-    let url = baseUrl + uri;
+    let url = uri.indexOf('http') ?  baseUrl + uri : uri;
     return new Promise((res, rej) => {
       form = typeof form === 'string' ? form : JSON.stringify(form);
       rq[method](url, xdl.wrapParams({ form, headers, jar }), (err, resp, body) => {
@@ -72,7 +72,12 @@ export default class Epnex {
           log(err, resp && resp.statusCode, body, 'error');
           rej(err || resp.statusMessage);
         } else {
-          res(typeof body === 'string' ? JSON.parse(body) : body);
+          try {
+            res(typeof body === 'string' ? JSON.parse(body) : body);
+          } catch (error) {
+            log('getData解析错误', error, 'error');
+            res(body);
+          }
         }
       })
     })
@@ -227,13 +232,16 @@ export default class Epnex {
       // 模拟获取分享海报 http://jxs-epn.oss-cn-hongkong.aliyuncs.com/epn/img/179817004@qq.com01C.png
       // http://jxs-epn.oss-cn-hongkong.aliyuncs.com/epn/img/rWviQ2TI5e@mln.kim01E.png
       let sharePngInfo = await this.getData('/selectUserPoster', loginInfo);
+      log('selectUserPoster完成', sharePngInfo, '即将进行获取分享图片');
       let pngs = JSON.parse(sharePngInfo.data)[0];
       try {
+        await this.getData('https://epnex.io/phoneSelf_share.html?lan=0', {}, 'get');
         await this.getData(pngs.Cuser_headPortrait1, {}, 'get');
       } catch (error) {
         log('C用户分享错误', user_email, error, 'error');
       }
       try {
+        await this.getData('https://epnex.io/phoneSelf_share.html?lan=1', {}, 'get');
         await this.getData(pngs.Euser_headPortrait1, {}, 'get');
       } catch (error) {
         log('E用户分享错误', user_email, error, 'error');
