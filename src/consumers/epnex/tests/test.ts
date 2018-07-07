@@ -100,7 +100,7 @@ async function updateUserInfo(inviteCode, yqm, count, interval): Promise<any> {
   let col = await mongo.getCollection('epnex', 'runningUserInfo');
   if (count > 0) {
     let uinfo = await col.updateOne({ yqm, inviteCode, interval }, { $set: { count }}, { upsert: true });
-    log('运行用户数据库更新成功, 更新用户:\t', uinfo);
+    log('运行用户数据库更新成功, 更新用户:\t', { yqm, inviteCode, interval, count });
   } else {
     let del = await col.deleteOne({inviteCode, yqm});
     log('用户次数减为零, 删除运行时用户成功!', del);
