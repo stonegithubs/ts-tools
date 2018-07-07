@@ -58,6 +58,7 @@ export default class Epnex {
   user_email: string;
   user_password: string = getRandomStr(12, 8);
   token: any;
+  loginInfo: any;
   constructor(public invitation: string) {}
 
   getData(uri: string, form: any = {}, method = 'post'): Promise<any> {
@@ -68,7 +69,7 @@ export default class Epnex {
       form = typeof form === 'string' ? form : JSON.stringify(form);
       rq[method](url, xdl.wrapParams({ form, headers, jar }), (err, resp, body) => {
         if (err || (resp && resp.statusCode !== 200)) {
-          log(err, resp.statusCode, body, 'error');
+          log(err, resp && resp.statusCode, body, 'error');
           rej(err || resp.statusMessage);
         } else {
           res(typeof body === 'string' ? JSON.parse(body) : body);
@@ -141,10 +142,11 @@ export default class Epnex {
     do {
       try {
         let [ mobile ] = await dz.getMobileNums();
-        let params = { mobile, areaCode: '86', ...form };
         doValidateBegin: {
           do{
+            let params = { mobile, areaCode: '86', ...form, ...this.loginInfo };
             try {
+              
               let result = await this.getData('/mobileVerificationCode', params);
               if (result.errcode === 0) {
                 switch (result.result) {
@@ -197,8 +199,8 @@ export default class Epnex {
       try {
         let loginResult = await this.getData('/userLogin.do', { user_email, user_password });
         if (loginResult && loginResult.result === 200) {
-          let loginInfo = JSON.parse(loginResult.data)[0];
-          this.token = loginInfo.token;
+          this.loginInfo = JSON.parse(loginResult.data)[0];
+          this.token = this.loginInfo.token;
           return loginResult;
         }
       } catch (error) {
@@ -206,6 +208,31 @@ export default class Epnex {
       }
     } while (await wait(2000, true));
   }
+
+  async mockOperation (): Promise<any> {
+    // 以下为模拟用户操作, 不关心是否成功!
+    let { loginInfo, loginInfo: { user_email }} = this;
+    try {
+      // 模拟 /UserSgin 用户签到
+      await this.getData('/UserSgin', loginInfo);
+      // 模拟 /Initial
+      await this.getData('/Initial', loginInfo);
+      // 模拟 /updateInvition
+      await this.getData('/updateInvition', loginInfo);
+      // 模拟 /selectUserPoster 进行分享
+      await this.getData('/updateInvition', loginInfo);
+      // 模拟 https://epnex.io/static/js/countryzz.json
+      // 模拟获取分享海报 http://jxs-epn.oss-cn-hongkong.aliyuncs.com/epn/img/179817004@qq.com01C.png
+      // http://jxs-epn.oss-cn-hongkong.aliyuncs.com/epn/img/rWviQ2TI5e@mln.kim01E.png
+      let sharePngInfo = await this.getData('/selectUserPoster', loginInfo);
+      let pngs = JSON.parse(sharePngInfo.data)[0];
+      await this.getData(pngs.Cuser_headPortrait1, {}, 'get');
+      await this.getData(pngs.Euser_headPortrait1, {}, 'get');
+    } catch (error) {
+      log('模拟分享等错误, 无需关注! 错误消息:\t', error, 'error');
+    }
+    log('模拟操作完成！');
+  } 
 
   async task(): Promise<any> {
     let dataHolds = {} as any;  // 用于记录 try 中的返回值, 在 catch 中可能用到
@@ -233,29 +260,8 @@ export default class Epnex {
           let waitTimt = getRandomInt(5, 2);
           log(`登陆成功! 等待 ${waitTimt} 分钟后进行手机号验证!`);
           await wait(waitTimt * 1000 * 60);
-
-          try {
-            // 以下为模拟用户操作, 不关心是否成功!
-            let loginInfo = JSON.parse(loginData.data)[0];   // 包含 token 等信息, 作模拟用户操作时的认证参数
-            // 模拟 /Initial
-            await this.getData('/Initial', loginInfo);
-            // 模拟 /updateInvition
-            await this.getData('/updateInvition', loginInfo);
-            // 模拟 /selectUserPoster 进行分享
-            await this.getData('/updateInvition', loginInfo);
-            // 模拟获取分享海报 http://jxs-epn.oss-cn-hongkong.aliyuncs.com/epn/img/179817004@qq.com01C.png
-            await this.getData(`http://jxs-epn.oss-cn-hongkong.aliyuncs.com/epn/img/${user_email}01C.png`, {}, 'get');
-            // 模拟 /UserSgin 用户签到
-            await this.getData('/UserSgin', loginInfo);
-            // 模拟 https://epnex.io/static/js/countryzz.json
-          }
-          catch (error) {
-            log('模拟分享等错误, 无需关注! 错误消息:\t', error, 'error');
-          }
-
           log(`开始进行手机号验证!`);
-          let { token } = this;
-          let phoneData = dataHolds.validatePhone = await this.validatePhone({ token, ...emailAndCode });
+          let phoneData = dataHolds.validatePhone = await this.validatePhone();
           if (!phoneData) throw new Error('注册手机号出现未知错误！可能是用户已经绑定手机号！');
           log(`手机号验证完成!手机号和验证码为:\t`, phoneData, '将未认证手机号的记录从未认证数据库集合中删除');
           await colNotValidatePhone.deleteOne({ user_email });
