@@ -229,12 +229,12 @@ export default class Epnex {
       try {
         await this.getData(pngs.Cuser_headPortrait1, {}, 'get');
       } catch (error) {
-        log('C用户分享错误', error, 'error');
+        log('C用户分享错误', user_email, error, 'error');
       }
       try {
         await this.getData(pngs.Euser_headPortrait1, {}, 'get');
       } catch (error) {
-        log('E用户分享错误', error, 'error');
+        log('E用户分享错误', user_email, error, 'error');
       }
     } catch (error) {
       log('模拟分享等错误, 无需关注! 错误消息:\t', error, 'error');
