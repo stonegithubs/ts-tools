@@ -10,6 +10,12 @@
     {
       "type": "node",
       "request": "launch",
+      "name": "epnexBulkMock",
+      "program": "${workspaceFolder}/build/main/consumers/epnex/tests/bulkMock.js"
+    },
+    {
+      "type": "node",
+      "request": "launch",
       "name": "epnex",
       "program": "${workspaceFolder}/build/main/consumers/epnex/tests/test.js"
     },
