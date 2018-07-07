@@ -215,13 +215,15 @@ export default class Epnex {
     try {
       // 模拟 /UserSgin 用户签到
       await this.getData('/UserSgin', loginInfo);
+      log('签到完成');
       // 模拟 /Initial
       await this.getData('/Initial', loginInfo);
+      log('Initial完成');
       // 模拟 /updateInvition
       await this.getData('/updateInvition', loginInfo);
-      // 模拟 /selectUserPoster 进行分享
-      await this.getData('/updateInvition', loginInfo);
+      log('updateInvition完成');
       // 模拟 https://epnex.io/static/js/countryzz.json
+      // 模拟 /selectUserPoster 进行分享
       // 模拟获取分享海报 http://jxs-epn.oss-cn-hongkong.aliyuncs.com/epn/img/179817004@qq.com01C.png
       // http://jxs-epn.oss-cn-hongkong.aliyuncs.com/epn/img/rWviQ2TI5e@mln.kim01E.png
       let sharePngInfo = await this.getData('/selectUserPoster', loginInfo);
