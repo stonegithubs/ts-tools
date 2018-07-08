@@ -35,8 +35,9 @@ export default class MyReq{
     })
 
     result.catch(error => {
-      console.log(uri, body, method, params);
+      console.error(uri, body, method, params);
       console.error('Req#getJson 错误:\t', error.message);
+      throw error;
     });
 
     return result;

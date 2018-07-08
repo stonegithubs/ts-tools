@@ -275,7 +275,7 @@ export default class Epnex {
           await colNotValidatePhone.insertOne({ user_password, user_email, invitation });
           let loginData = dataHolds.login = await this.login();
           // 进行手机验证。
-          let waitTimt = getRandomInt(5, 2);
+          let waitTimt = getRandomInt(5, 2) as number;
           log(`登陆成功! 等待 ${waitTimt} 分钟后进行手机号验证!`);
           await wait(waitTimt * 1000 * 60);
           log(`开始进行手机号验证!`);

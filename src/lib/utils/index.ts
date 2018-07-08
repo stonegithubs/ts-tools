@@ -1,6 +1,7 @@
 import crypto from 'crypto';
+import colors from 'colors';
 
-const { random, floor } = Math;
+const { random, floor, abs } = Math;
 
 export function md5 (str: string, encoding: any = 'hex'): string {
   return crypto.createHash('md5').update(str).digest(encoding).toString();
@@ -46,7 +47,14 @@ export function getRandom(max = 100, min = 0, integer?): number {
 }
 
 // 返回 [min, max)
-export function getRandomInt(max = 100, min = 0): number {
+export function getRandomInt(max = 100, min = 0, length?: number): (number | number[]) {
+  if (length) {
+    let numbers = [];
+    for(let i = 0; i < abs(length); i++) {
+      numbers.push(getRandom(max, min, true));
+    }
+    return numbers;
+  }
   return getRandom(max, min, true);
 }
 
@@ -63,7 +71,7 @@ export function getRandomStr(maxLen: number = 20, minLen: number = 1, chars = ge
   const len = getRandomInt(maxLen, minLen);
   let str = '';
   for (let i = 0; i < len; i++) {
-    str += chars[getRandomInt(0, chars.length)]
+    str += chars[getRandomInt(0, chars.length) as number]
   }
   return str;
 }
@@ -71,5 +79,20 @@ export function getRandomStr(maxLen: number = 20, minLen: number = 1, chars = ge
 export function log(...rest): void{
   let method = rest[rest.length - 1];
   method = console.hasOwnProperty(method) ? rest.pop() : 'log';
-  console[method].apply({}, [ new Date().toLocaleString(), '\n', ...rest ]);
+  rest = rest.map(el => {
+    if (typeof el === 'string') {
+      switch (method) {
+        case 'log':
+          break;
+        case 'warn':
+          el['magenta'];
+          break;
+        case 'error':
+        default:
+          break;
+      }
+    }
+    return el;
+  })
+  console['log'].apply({}, [ new Date().toLocaleString(), '\n', ...rest ]);
 }

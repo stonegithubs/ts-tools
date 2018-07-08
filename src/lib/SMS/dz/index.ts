@@ -1,5 +1,5 @@
 import Req from '../../../lib/request';
-import { throwError, wait } from '../../utils';
+import { throwError, wait, log } from '../../utils';
 import SMS from '../interfaces/SMS.base';
 
 export default class DZ implements SMS {
@@ -25,12 +25,14 @@ export default class DZ implements SMS {
   }
 
   async getMessageByMobile(mobile: string, reuse?: boolean, next_pid?: string): Promise<any>{
+    await this._checkLogin();
     let  { uid, token, requester } = this;
     let action = reuse ? 'getVcodeAndHoldMobilenum' : 'getVcodeAndReleaseMobile';
     let result = '';
     do {
       result = await requester.workFlow('', { action, uid, token, mobile, next_pid, author_uid: 'zhang179817004' }) || '';
-    } while (result === 'not_receive' && await wait(2000, true));
+    } while ((result === 'not_receive' || result === 'message|to_fast_try_again') && await wait(2000, true));
+    log('dz获取短信结果', result);
     let [, message] = result.split('|');
     return { mobile, message };
   }

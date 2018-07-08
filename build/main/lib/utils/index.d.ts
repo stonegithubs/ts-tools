@@ -5,7 +5,7 @@ export declare function wait(time: any, data?: any): Promise<any>;
 export declare function throwError(msg: any): never;
 export declare function check(fn: any, msg?: string, msTimeout?: number, interval?: number): Promise<any>;
 export declare function getRandom(max?: number, min?: number, integer?: any): number;
-export declare function getRandomInt(max?: number, min?: number): number;
+export declare function getRandomInt(max?: number, min?: number, length?: number): (number | number[]);
 export declare function getDefaultChars(): string[];
 export declare function getRandomStr(maxLen?: number, minLen?: number, chars?: string[]): string;
 export declare function log(...rest: any[]): void;

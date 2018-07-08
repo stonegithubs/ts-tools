@@ -4,6 +4,12 @@
     {
       "type": "node",
       "request": "launch",
+      "name": "zk",
+      "program": "${workspaceFolder}/build/main/consumers/zk/tests/test.js"
+    },
+    {
+      "type": "node",
+      "request": "launch",
       "name": "Dz",
       "program": "${workspaceFolder}/build/main/lib/SMS/dz/tests/test.js"
     },
