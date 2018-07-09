@@ -1,5 +1,5 @@
-import crypto from 'crypto';
 import colors from 'colors';
+import crypto from 'crypto';
 
 const { random, floor, abs } = Math;
 
@@ -85,8 +85,7 @@ export function log(...rest): void{
         case 'log':
           break;
         case 'warn':
-          el['magenta'];
-          break;
+          return colors.red(el);
         case 'error':
         default:
           break;
@@ -94,5 +93,6 @@ export function log(...rest): void{
     }
     return el;
   })
+
   console['log'].apply({}, [ new Date().toLocaleString(), '\n', ...rest ]);
 }

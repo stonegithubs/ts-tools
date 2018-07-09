@@ -1,10 +1,10 @@
 import Mongo from '../../../lib/mongo/';
-import Epnex from '../epnex';
 import { getRandomInt, log } from '../../../lib/utils';
+import Epnex from '../epnex';
 
 let mongo = new Mongo();
 
-function autoMock() {
+function autoMock():void {
     mongo.getCollection('epnex', 'regists').then(col => {
         let cur = col.find();
         let count = 0;
@@ -12,7 +12,7 @@ function autoMock() {
             count++;
             log(`当前第\t${count}\t条数据`);
             let ep = new Epnex(item.invitation);  // '00TPBBT'
-            let randTime = getRandomInt(3600 * 12) as number;   // 12 小时内完成
+            let randTime = getRandomInt(3600) as number;   // 12 小时内完成
             log(`将在\t${randTime}\t秒钟之后模拟用户操作！`);
 
             setTimeout(async () => {

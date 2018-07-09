@@ -1,5 +1,5 @@
 import Req from '../../../lib/request';
-import { throwError, wait, log } from '../../utils';
+import { log, throwError, wait } from '../../utils';
 import SMS from '../interfaces/SMS.base';
 
 export default class DZ implements SMS {
@@ -67,7 +67,7 @@ export default class DZ implements SMS {
     await this._checkLogin();
     mobiles = Array.isArray(mobiles) ? mobiles.join(',') : mobiles;
     let { uid, token, requester } = this;
-    let result = await requester.workFlow('', { action: 'addIgnoreList', uid, token, pid: this.pid, ...params });
+    let result = await requester.workFlow('', { action: 'addIgnoreList', mobiles, uid, token, pid: this.pid, ...params });
     return result
   }
 

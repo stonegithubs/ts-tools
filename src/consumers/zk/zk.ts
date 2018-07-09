@@ -2,10 +2,10 @@
 
 import Mongo from '../../lib/mongo/';
 import XunDaili from '../../lib/proxy/xundaili';
+import MyReq from '../../lib/request';
 import DZ from '../../lib/SMS/dz/';
 import { getRandomInt, getRandomStr, log, throwError, wait } from '../../lib/utils';
 import Requester from '../../lib/utils/declarations/requester';
-import MyReq from '../../lib/request';
 
 //  --------- DZ ---------
 
@@ -24,14 +24,14 @@ export default class ZK implements Requester {
     static baseURL: 'https://m.mycchk.com/tools/submit_ajax.ashx';
     requester: MyReq = new MyReq('', { json: false });
     constructor(protected readonly txtCode: string) {}
-    async getData(params, uri?, method = 'post', rqParams = { json: true }) {
+    async getData(params, uri?, method = 'post', rqParams = { json: true }): Promise<any> {
         // let { baseURL } = ZK;
         let  { requester } = this;
         let url = uri || 'https://m.mycchk.com/tools/submit_ajax.ashx' + '?';
         for (const key in params) {
             if (params.hasOwnProperty(key)) {
                 const element = params[key];
-                url += `${key}=${element}&` 
+                url += `${key}=${element}&`
             }
         }
         return requester.workFlow(url, params, method, xdl.wrapHeader({
@@ -87,7 +87,7 @@ export default class ZK implements Requester {
         })
     }
 
-    async task(id?) {
+    async task(id?):Promise<any> {
         log(`任务\t${id}\t开始！`);
         let mobileAndCode = await this.sendMSG();
         log('短信以获取', mobileAndCode);
