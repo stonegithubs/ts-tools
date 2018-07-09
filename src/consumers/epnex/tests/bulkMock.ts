@@ -6,13 +6,13 @@ let mongo = new Mongo();
 
 function autoMock():void {
     mongo.getCollection('epnex', 'regists').then(col => {
-        let cur = col.find();
+        let cur = col.find({signed:{$lte:1}});
         let count = 0;
         cur.forEach((item) => {
             count++;
             log(`当前第\t${count}\t条数据`);
             let ep = new Epnex(item.invitation);  // '00TPBBT'
-            let randTime = getRandomInt(3600) as number;   // 12 小时内完成
+            let randTime = getRandomInt(10) as number;   // 12 小时内完成
             log(`将在\t${randTime}\t秒钟之后模拟用户操作！`);
 
             setTimeout(async () => {
