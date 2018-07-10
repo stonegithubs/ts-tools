@@ -6,7 +6,8 @@ let mongo = new Mongo();
 
 function autoMock():void {
     mongo.getCollection('epnex', 'regists').then(col => {
-        let cur = col.find({signed:{$lte:1}});
+        // let query = {signed:{$lte:1}};
+        let cur = col.find();
         let count = 0;
         cur.forEach((item) => {
             count++;
