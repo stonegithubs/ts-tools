@@ -220,7 +220,7 @@ export default class Epnex {
     try {
       // 模拟 /UserSgin 用户签到
       await this.getData('/UserSgin', loginInfo);
-      log('签到完成');
+      log('签到完成', 'warn');
       // 模拟 /Initial
       await this.getData('/Initial', loginInfo);
       log('Initial完成');

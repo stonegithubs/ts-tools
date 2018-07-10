@@ -23,7 +23,8 @@ const mongo = new Mongo();
 export default class ZK implements Requester {
     static baseURL: 'https://m.mycchk.com/tools/submit_ajax.ashx';
     requester: MyReq = new MyReq('', { json: false });
-    constructor(protected readonly txtCode: string) {}
+
+    constructor(protected readonly txtCode: string, public txtUserName?:string, public txtPassword?:string) {}
     async getData(params, uri?, method = 'post', rqParams = { json: true }): Promise<any> {
         // let { baseURL } = ZK;
         let  { requester } = this;
@@ -84,6 +85,18 @@ export default class ZK implements Requester {
             action: 'user_register',
             site_id: 2,
             ...params
+        })
+    }
+
+    async login(): Promise<any> {
+        let { txtUserName, txtPassword } = this;
+        return this.getData({
+            action: 'user_login',
+            site_id: 2,
+            txtUserName,
+            txtPassword
+        }).then(data => {
+            log('登录信息：\t', data);
         })
     }
 
