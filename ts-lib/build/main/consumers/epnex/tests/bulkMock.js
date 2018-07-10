@@ -16,7 +16,7 @@ function autoMock() {
             count++;
             utils_1.log(`当前第\t${count}\t条数据`);
             let ep = new epnex_1.default(item.invitation); // '00TPBBT'
-            let randTime = utils_1.getRandomInt(23 * 60); // 12 小时内完成
+            let randTime = utils_1.getRandomInt(22 * 60); // 12 小时内完成
             utils_1.log(`将在\t${randTime}\t秒钟之后模拟用户操作！`);
             setTimeout(async () => {
                 await ep.login(item.user_email, item.user_password);

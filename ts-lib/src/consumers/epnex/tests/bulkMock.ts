@@ -13,7 +13,7 @@ function autoMock():void {
             count++;
             log(`当前第\t${count}\t条数据`);
             let ep = new Epnex(item.invitation);  // '00TPBBT'
-            let randTime = getRandomInt(23 * 60) as number;   // 12 小时内完成
+            let randTime = getRandomInt(22 * 60) as number;   // 12 小时内完成
             log(`将在\t${randTime}\t秒钟之后模拟用户操作！`);
 
             setTimeout(async () => {
