@@ -151,7 +151,7 @@ export default class Epnex {
           do{
             let params = { mobile, areaCode: '86', ...form, ...this.loginInfo };
             try {
-              
+
               let result = await this.getData('/mobileVerificationCode', params);
               if (result.errcode === 0) {
                 switch (result.result) {
@@ -217,6 +217,7 @@ export default class Epnex {
   async mockOperation (): Promise<any> {
     // 以下为模拟用户操作, 不关心是否成功!
     let { loginInfo, loginInfo: { user_email }} = this;
+    log('模拟开始');
     try {
       // 模拟 /UserSgin 用户签到
       await this.getData('/UserSgin', loginInfo);
@@ -250,7 +251,7 @@ export default class Epnex {
       log('模拟分享等错误, 无需关注! 错误消息:\t', error, 'error');
     }
     log('模拟操作完成！');
-  } 
+  }
 
   async task(): Promise<any> {
     let dataHolds = {} as any;  // 用于记录 try 中的返回值, 在 catch 中可能用到
