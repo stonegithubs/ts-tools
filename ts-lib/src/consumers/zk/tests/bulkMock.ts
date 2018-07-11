@@ -14,7 +14,7 @@ function autoMock():void {
             log(`当前第\t${count}\t条数据`);
             let zk = new ZK(item.txtCode, item.txtUserName, item.txtPassword);  // '00TPBBT'
             let randTime = getRandomInt(1000 * 60 * 16) as number;   // 12 小时内完成
-            log(`将在\t${randTime}\t秒钟之后模拟用户操作！`);
+            log(`将在\t${randTime/1000}\t秒钟之后模拟用户操作！`);
 
             setTimeout(async () => {
                 await zk.login();
