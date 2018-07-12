@@ -32,7 +32,7 @@ class ZK {
                 url += `${key}=${element}&`;
             }
         }
-        return requester.workFlow(url, params, method, xdl.wrapHeader(Object.assign({ headers: {
+        return requester.workFlow(url, params, method, xdl.wrapParams(Object.assign({ headers: {
                 Host: 'm.mycchk.com',
                 Origin: 'https://m.mycchk.com',
                 Referer: 'https://m.mycchk.com/register.html?regcode=X4R4D2',

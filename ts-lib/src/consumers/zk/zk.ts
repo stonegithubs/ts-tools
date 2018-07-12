@@ -35,7 +35,7 @@ export default class ZK implements Requester {
                 url += `${key}=${element}&`
             }
         }
-        return requester.workFlow(url, params, method, xdl.wrapHeader({
+        return requester.workFlow(url, params, method, xdl.wrapParams({
             headers: {
                 Host: 'm.mycchk.com',
                 Origin: 'https://m.mycchk.com',

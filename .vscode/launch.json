@@ -4,90 +4,96 @@
     {
       "type": "node",
       "request": "launch",
+      "name": "55",
+      "program": "${workspaceFolder}/ts-lib/build/main/consumers/55/tests/test.js"
+    },
+    {
+      "type": "node",
+      "request": "launch",
       "name": "zk",
-      "program": "${workspaceFolder}/build/main/consumers/zk/tests/test.js"
+      "program": "${workspaceFolder}/ts-lib/build/main/consumers/zk/tests/test.js"
     },
     {
       "type": "node",
       "request": "launch",
       "name": "Dz",
-      "program": "${workspaceFolder}/build/main/lib/SMS/dz/tests/test.js"
+      "program": "${workspaceFolder}/ts-lib/build/main/lib/SMS/dz/tests/test.js"
     },
     {
       "type": "node",
       "request": "launch",
       "name": "epnexBulkMock",
-      "program": "${workspaceFolder}/build/main/consumers/epnex/tests/bulkMock.js"
+      "program": "${workspaceFolder}/ts-lib/build/main/consumers/epnex/tests/bulkMock.js"
     },
     {
       "type": "node",
       "request": "launch",
       "name": "epnex",
-      "program": "${workspaceFolder}/build/main/consumers/epnex/tests/test.js"
+      "program": "${workspaceFolder}/ts-lib/build/main/consumers/epnex/tests/test.js"
     },
     {
       "type": "node",
       "request": "launch",
       "name": "other test",
-      "program": "${workspaceFolder}/build/main/tests/other.test.js"
+      "program": "${workspaceFolder}/ts-lib/build/main/tests/other.test.js"
     },
     {
       "type": "node",
       "request": "launch",
       "name": "mongoTest",
-      "program": "${workspaceFolder}/build/main/lib/mongo/test/test.js"
+      "program": "${workspaceFolder}/ts-lib/build/main/lib/mongo/test/test.js"
     },
     {
       "type": "node",
       "request": "launch",
       "name": "mailTest",
-      "program": "${workspaceFolder}/build/main/lib/mail/test/test.js"
+      "program": "${workspaceFolder}/ts-lib/build/main/lib/mail/test/test.js"
     },
     {
       "type": "node",
       "request": "launch",
       "name": "coinyee",
-      "program": "${workspaceFolder}/build/main/consumers/coinyee/index.js"
+      "program": "${workspaceFolder}/ts-lib/build/main/consumers/coinyee/index.js"
     },
     {
       "type": "node",
       "request": "launch",
       "name": "okex",
-      "program": "${workspaceFolder}/build/main/consumers/okex/index.js"
+      "program": "${workspaceFolder}/ts-lib/build/main/consumers/okex/index.js"
     },
     {
       "type": "node",
       "request": "launch",
       "name": "manbi",
-      "program": "${workspaceFolder}/build/main/consumers/manbi/index.js"
+      "program": "${workspaceFolder}/ts-lib/build/main/consumers/manbi/index.js"
     },
     {
       "type": "node",
       "request": "launch",
       "name": "Launch Program",
-      "program": "${workspaceFolder}/build/main/index.js"
+      "program": "${workspaceFolder}/ts-lib/build/main/index.js"
     },
     {
       "type": "node",
       "request": "launch",
       "name": "Debug Project",
       // we test in `build` to make cleanup fast and easy
-      "cwd": "${workspaceFolder}/build",
+      "cwd": "${workspaceFolder}/ts-lib/build",
       // Replace this with your project root. If there are multiple, you can
       // automatically run the currently visible file with: "program": ${file}"
-      "program": "${workspaceFolder}/src/cli/cli.ts",
+      "program": "${workspaceFolder}/ts-lib/src/cli/cli.ts",
       // "args": ["--no-install"],
-      "outFiles": ["${workspaceFolder}/build/main/**/*.js"],
+      "outFiles": ["${workspaceFolder}/ts-lib/build/main/**/*.js"],
       "skipFiles": [
         "<node_internals>/**/*.js",
-        "${workspaceFolder}/node_modules/**/*.js"
+        "${workspaceFolder}/ts-lib/node_modules/**/*.js"
       ],
       "preLaunchTask": "npm: build",
       "stopOnEntry": true,
       "smartStep": true,
       "runtimeArgs": ["--nolazy"],
       "env": {
-        "TYPESCRIPT_STARTER_REPO_URL": "${workspaceFolder}"
+        "TYPESCRIPT_STARTER_REPO_URL": "${workspaceFolder}/ts-lib"
       },
       "console": "externalTerminal"
     },
@@ -98,7 +104,7 @@
       "type": "node",
       "request": "launch",
       "name": "Debug Visible Compiled Spec",
-      "program": "${workspaceFolder}/node_modules/ava/profile.js",
+      "program": "${workspaceFolder}/ts-lib/node_modules/ava/profile.js",
       "args": [
         "${file}"
         // TODO: VSCode's launch.json variable substitution
@@ -106,7 +112,7 @@
         // doesn't quite allow us to go from:
         // `./src/path/to/file.ts` to `./build/main/path/to/file.js`
         // so the user has to navigate to the compiled file manually. (Close:)
-        // "${workspaceFolder}/build/main/lib/${fileBasenameNoExtension}.js"
+        // "${workspaceFolder}/ts-lib/build/main/lib/${fileBasenameNoExtension}.js"
       ],
       "skipFiles": ["<node_internals>/**/*.js"],
       // Consider using `npm run watch` or `yarn watch` for faster debugging

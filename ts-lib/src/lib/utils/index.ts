@@ -1,5 +1,6 @@
 import colors from 'colors';
 import crypto from 'crypto';
+import { URL, URLSearchParams } from 'url';
 
 const { random, floor, abs } = Math;
 
@@ -95,4 +96,19 @@ export function log(...rest): void{
   })
 
   console['log'].apply({}, [ new Date().toLocaleString(), '\n', ...rest ]);
+}
+
+export function buildURL(uri = '', query = {}) {
+  let uriInfo = uri.split('?');
+  let search;
+  if (uriInfo[1]) {
+    search = `${new URLSearchParams(uriInfo[1])}&${new URLSearchParams(query)}`;
+  } else {
+    search = new URLSearchParams(query);
+  }
+  return `${uri}?${search}`;
+}
+
+export function until(cb) {
+
 }

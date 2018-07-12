@@ -50,7 +50,7 @@ export default class DZ implements SMS {
     await this._checkLogin();
     let { uid, token, requester } = this;
     let result = await requester.workFlow('', { action: 'getMobilenum', uid, token, size: 1, pid: this.pid, ...params });
-    let data = result.split('|')[0];
+    let [ data ] = result.split('|');
     return  data ? data.split(';') : throwError(`获取手机号错误:\t${result}`);
   }
 

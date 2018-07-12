@@ -1,4 +1,5 @@
 import rq from 'request';
+import { log } from '../utils';
 
 export default class MyReq{
   static getData(uri: string, body: any = {}, method: string = 'GET', params: any = { json: true }): Promise<any> {
@@ -20,7 +21,9 @@ export default class MyReq{
         case 'put':
         default:
           params.body = body;
-          params.form = body;
+          if (!params.json) {
+            params.form = body;
+          }
         break;
     }
 
@@ -44,7 +47,16 @@ export default class MyReq{
   }
   static getJson(uri: string, body: any = {}, method: string = 'GET', params: any = { json: true }): Promise<any> {
     let result = MyReq.getData(uri, body, method, params);
-    return result.then(data => typeof data === 'string' ? JSON.parse(data) : data);
+    return result.then(data => {
+        console.log(data);
+        let jsonData;
+        try {
+          jsonData = typeof data === 'string' ? JSON.parse(data) : data;
+        } catch (error) {
+          log('Req#JSON解析错误！', error, 'error');
+        }
+         return jsonData || data;
+      });
   }
 
   public readonly jar: object = rq.jar();  // 保存 cookie
@@ -54,10 +66,10 @@ export default class MyReq{
   constructor(protected readonly baseURL: string = '', protected conf = { json: true }) {}
 
   async workFlow(uri: string, data: object = {}, method: string = 'GET', params: any = {}) : Promise<any> {
-    let { conf, baseURL, jar, proxy } = this;
-    const oParams = { ...params, jar, proxy };
+    let { conf: { json }, baseURL, jar, proxy } = this;
+    const oParams = { json, ...params, jar, proxy };
     try {
-      let response = await MyReq[(params.json || conf.json) ? 'getJson' : 'getData'](baseURL + uri, data, method, oParams);
+      let response = await MyReq[(oParams.json) ? 'getJson' : 'getData'](baseURL + uri, data, method, oParams);
       this.data.push(response);
       return response;
     } catch (error) {

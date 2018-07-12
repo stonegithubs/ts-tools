@@ -9,3 +9,5 @@ export declare function getRandomInt(max?: number, min?: number, length?: number
 export declare function getDefaultChars(): string[];
 export declare function getRandomStr(maxLen?: number, minLen?: number, chars?: string[]): string;
 export declare function log(...rest: any[]): void;
+export declare function buildURL(uri?: string, query?: {}): string;
+export declare function until(cb: any): void;
