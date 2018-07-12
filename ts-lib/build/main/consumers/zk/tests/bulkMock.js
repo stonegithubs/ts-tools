@@ -16,7 +16,7 @@ function autoMock() {
             count++;
             utils_1.log(`当前第\t${count}\t条数据`);
             let zk = new zk_1.default(item.txtCode, item.txtUserName, item.txtPassword); // '00TPBBT'
-            let randTime = utils_1.getRandomInt(1000 * 60 * 60 * 4); // 4 小时内完成
+            let randTime = utils_1.getRandomInt(1000 * 60 * 60 * 5); // 5 小时内完成
             utils_1.log(`将在\t${randTime / 1000}\t秒钟之后模拟用户操作！`);
             setTimeout(async () => {
                 await zk.login();
