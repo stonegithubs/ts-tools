@@ -120,6 +120,7 @@ export default class Coin55 implements Requester {
                 log('注册失败！', error, 'error');
             }
         } while (await wait(2000, true));
+        return '';
     }
     async login(phone, password) {
         await this.getData('/login/sigin.html', {}, 'get', { json: false });
