@@ -6,6 +6,7 @@ import MyReq from '../../lib/request';
 import DZ from '../../lib/SMS/dz/';
 import { getRandomInt, getRandomStr, log, throwError, wait } from '../../lib/utils';
 import Requester from '../../lib/utils/declarations/requester';
+import rq from 'request';
 
 //  --------- DZ ---------
 
@@ -25,7 +26,7 @@ export default class ZK implements Requester {
     requester: MyReq = new MyReq('', { json: false });
 
     constructor(protected readonly txtCode: string, public txtUserName?:string, public txtPassword?:string) {}
-    async getData(params, uri?, method = 'post', rqParams = { json: true }): Promise<any> {
+    async getData(params, uri?, method = 'post', rqParams = {  }): Promise<any> {
         // let { baseURL } = ZK;
         let  { requester } = this;
         let url = uri || 'https://m.mycchk.com/tools/submit_ajax.ashx' + '?';
@@ -35,14 +36,21 @@ export default class ZK implements Requester {
                 url += `${key}=${element}&`
             }
         }
-        return requester.workFlow(url, params, method, xdl.wrapParams({
+        var p = {
             headers: {
-                Host: 'm.mycchk.com',
-                Origin: 'https://m.mycchk.com',
-                Referer: 'https://m.mycchk.com/register.html?regcode=X4R4D2',
+                'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
+                'Host': 'm.mycchk.com',
+                'Origin': 'https://m.mycchk.com',
+                'Pragma': 'no-cache',
+                'Referer': 'https://m.mycchk.com/login.html',
+                'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A372 Safari/604.1'
             },
             ...rqParams
-        }));
+        } as any;
+        console.log(JSON.parse(JSON.stringify(p)), xdl.wrapParams(JSON.parse(JSON.stringify(p))) );
+        return requester.workFlow(url, params, method, //xdl.wrapParams(
+            p
+        )
     }
     async sendMSG(): Promise<any> {
         let mb;
