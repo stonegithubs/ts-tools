@@ -12,5 +12,5 @@ export default class Coin55 implements Requester {
     checkCode(params: any): Promise<any>;
     register(params: any, token: any): Promise<boolean | "">;
     login(phone: any, password: any): Promise<void>;
-    task(): Promise<void>;
+    task(task_id: any): Promise<void>;
 }

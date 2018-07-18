@@ -4,6 +4,18 @@
     {
       "type": "node",
       "request": "launch",
+      "name": "survey",
+      "program": "${workspaceFolder}/ts-lib/build/main/consumers/survey/index.js"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "autoReverseProxy",
+      "program": "${workspaceFolder}/ts-lib/build/main/consumers/autoReverseProxy/index.js"
+    },
+    {
+      "type": "node",
+      "request": "launch",
       "name": "55",
       "program": "${workspaceFolder}/ts-lib/build/main/consumers/55/tests/test.js"
     },

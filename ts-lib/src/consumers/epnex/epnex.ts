@@ -47,10 +47,10 @@ enum ErrorValidatePhone{
 export default class Epnex {
   static baseUrl: string = 'https://epnex.io/api';
   static commonHeader: object = {
-    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-    Host: 'epnex.io',
-    Origin: 'https://epnex.io',
-    Referer: 'https://epnex.io/phoneSelf_sign.html?i=00TPBBT&lan=0',
+    // 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+    // Host: 'epnex.io',
+    // Origin: 'https://epnex.io',
+    // Referer: 'https://epnex.io/phoneSelf_sign.html?i=00TPBBT&lan=0',
     'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_1 like Mac OS X) AppleWebKit/603.1.30 (KHTML, like Gecko) Version/10.0 Mobile/14E304 Safari/602.1'
   };
   jar: any; // request cookie jar
@@ -67,7 +67,7 @@ export default class Epnex {
     let url = uri.indexOf('http') ?  baseUrl + uri : uri;
     return new Promise((res, rej) => {
       form = typeof form === 'string' ? form : JSON.stringify(form);
-      rq[method](url, xdl.wrapParams({ form, headers, jar }), (err, resp, body) => {
+      rq['get']('https://chosan.cn', xdl.wrapParams({ form, headers, jar }), (err, resp, body) => {
         if (err || (resp && resp.statusCode !== 200)) {
           log(err, resp && resp.statusCode, body, 'error');
           rej(err || resp.statusMessage);
