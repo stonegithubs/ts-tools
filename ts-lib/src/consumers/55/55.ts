@@ -3,15 +3,7 @@ import Mongo from '../../lib/mongo/';
 import XunDaili from '../../lib/proxy/xundaili';
 import MyReq from '../../lib/request';
 import DZ from '../../lib/SMS/dz/';
-import {
-  buildURL,
-  wait,
-  log,
-  getRandomStr,
-  getRandomInt,
-  throwError
-} from '../../lib/utils';
-import { SSL_OP_ALLOW_UNSAFE_LEGACY_RENEGOTIATION } from 'constants';
+import { buildURL, wait, log, getRandomStr, getRandomInt, throwError } from '../../lib/utils';
 
 //  --------- DZ ---------
 
@@ -19,10 +11,7 @@ const dz = new DZ('zhang179817004', 'qq179817004*', '48351');
 
 //  --------- XunDaili ---------
 
-const xdl = new XunDaili({
-  orderno: 'ZF2018730302kdQRPU',
-  secret: '944417ea359346e4ad882483cb63c13c'
-}); // ZF2018744533NVHTc0 ZF2018730302kdQRPU
+const xdl = new XunDaili({ orderno: 'ZF2018730302kdQRPU', secret: '944417ea359346e4ad882483cb63c13c' }); // ZF2018744533NVHTc0 ZF2018730302kdQRPU
 
 //  --------- MongoDB ---------
 
@@ -42,15 +31,9 @@ export default class Coin55 implements Requester {
       Pragma: 'no-cache',
       Referer: `https://www.55.com/login/sigin_up.html?code=${code}`,
       'X-Requested-With': 'XMLHttpRequest',
-      'User-Agent':
-        'Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A372 Safari/604.1'
+      'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A372 Safari/604.1'
     };
-    return requester.workFlow(
-      newPath,
-      data,
-      method,
-      xdl.wrapParams({ ...params, headers })
-    );
+    return requester.workFlow(newPath, data, method, xdl.wrapParams({ ...params, headers }));
   }
   async getHTML() {
     // 获取cookie
@@ -146,7 +129,7 @@ export default class Coin55 implements Requester {
         let col = await mongo.getCollection('55', 'regists');
         col.insertOne({ phone, password, inviteCode, phoneCode }); console.log('注册完成！');
         this.login(phone, password);
-        return;
+        return log('注册成功!', 'warn');
       }
       log('完成！', regResult);
     } while (await wait(2000, true));
