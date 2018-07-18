@@ -1,5 +1,5 @@
 export default {
   survey: {
-    port: 80
+    port: 8888
   }
 }
