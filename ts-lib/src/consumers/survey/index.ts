@@ -7,15 +7,6 @@ let mongo = new Mongo();
 
 new Koa([
   {
-    method: 'get',
-    path: '/surveies',
-    cb: async ctx => {
-      log('数据接收到!');
-      ctx.body = '111111';
-      log('数据写入完成!');
-    }
-  },
-  {
     method: 'post',
     path: '/surveies',
     cb: async ctx => {
