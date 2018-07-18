@@ -27,8 +27,8 @@ new Koa([
       log('数据写入完成!', result);
     }
   }
-]).listen(reverseConf.survey.port, e => {
-  log('e:\t', e);
+]).listen(reverseConf.survey.port, function() {
+  log('e:\t', arguments);
   log(`在端口${reverseConf.survey.port}侦听成功!`);
 });
 
