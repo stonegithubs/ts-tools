@@ -13,7 +13,7 @@ function autoMock():void {
             count++;
             log(`当前第\t${count}\t条数据`);
             let zk = new ZK(item.txtCode, item.txtUserName, item.txtPassword);  // '00TPBBT'
-            let randTime = getRandomInt(1000 * 60 * 60) as number;   // 5 小时内完成
+            let randTime = getRandomInt(1000 * 60 * 10) as number;   // 5 小时内完成
             log(`将在\t${randTime / 1000}\t秒钟之后模拟用户操作！`);
 
             setTimeout(async () => {

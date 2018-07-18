@@ -40,7 +40,6 @@ export default class ZK implements Requester {
                 Host: 'm.mycchk.com',
                 Origin: 'https://m.mycchk.com',
                 Referer: 'https://m.mycchk.com/register.html?regcode=X4R4D2',
-                'Content-Type': 'application/x-www-form-urlencoded'
             },
             ...rqParams
         }));

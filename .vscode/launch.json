@@ -10,6 +10,12 @@
     {
       "type": "node",
       "request": "launch",
+      "name": "zkBulk",
+      "program": "${workspaceFolder}/ts-lib/build/main/consumers/zk/tests/bulkMock.js"
+    },
+    {
+      "type": "node",
+      "request": "launch",
       "name": "zk",
       "program": "${workspaceFolder}/ts-lib/build/main/consumers/zk/tests/test.js"
     },
