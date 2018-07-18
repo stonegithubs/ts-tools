@@ -25,7 +25,7 @@ export default class ZK implements Requester {
     requester: MyReq = new MyReq('', { json: false });
 
     constructor(protected readonly txtCode: string, public txtUserName?:string, public txtPassword?:string) {}
-    async getData(params, uri?, method = 'post', rqParams = { json: true }): Promise<any> {
+    async getData(params, uri?, method = 'post', rqParams = {  }): Promise<any> {
         // let { baseURL } = ZK;
         let  { requester } = this;
         let url = uri || 'https://m.mycchk.com/tools/submit_ajax.ashx' + '?';
@@ -35,14 +35,19 @@ export default class ZK implements Requester {
                 url += `${key}=${element}&`
             }
         }
-        return requester.workFlow(url, params, method, xdl.wrapParams({
-            headers: {
-                Host: 'm.mycchk.com',
-                Origin: 'https://m.mycchk.com',
-                Referer: 'https://m.mycchk.com/register.html?regcode=X4R4D2',
-            },
-            ...rqParams
-        }));
+        return requester.workFlow('https://ip.cn', params, 'get', xdl.wrapParams(
+            {
+                headers: {
+                    // Host: 'm.mycchk.com',
+                    // Origin: 'https://m.mycchk.com',
+                    // Referer: 'https://m.mycchk.com/register.html?regcode=X4R4D2',
+                    // 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                    'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_1 like Mac OS X) AppleWebKit/603.1.30 (KHTML, like Gecko) Version/10.0 Mobile/14E304 Safari/602.1'
+                },
+                ...rqParams
+            }
+        )
+        );
     }
     async sendMSG(): Promise<any> {
         let mb;
