@@ -8,5 +8,8 @@ declare const _default: {
     INVE: {
         port: number;
     };
+    ZK: {
+        port: number;
+    };
 };
 export default _default;

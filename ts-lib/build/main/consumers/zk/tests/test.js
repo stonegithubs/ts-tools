@@ -3,21 +3,46 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const utils_1 = require("../../../lib/utils");
 const zk_1 = __importDefault(require("../zk"));
-let count = 0;
+const koa_1 = __importDefault(require("../../../lib/koa"));
+const mongo_1 = __importDefault(require("../../../lib/mongo/"));
+const reverseProxyConf_1 = __importDefault(require("../../../conf/reverseProxyConf"));
+const utils_1 = require("../../../lib/utils");
+let mongo = new mongo_1.default();
 let max = 100;
-function run() {
+let running = {};
+new koa_1.default([
+    {
+        method: 'get',
+        path: '/',
+        cb: async (ctx) => {
+            let { code = '' } = ctx.query;
+            let count = 0;
+            if (running[code]) {
+                ctx.body = '请勿重复添加！';
+            }
+            else {
+                run(code, count);
+                running[code] = true;
+                ctx.body = '添加成功！';
+            }
+        }
+    }
+]).listen(reverseProxyConf_1.default.ZK.port, function () {
+    utils_1.log(`在端口${reverseProxyConf_1.default.ZK.port}侦听成功!`);
+});
+function run(code, count) {
     count++;
-    if (count > max)
+    if (count > max) {
+        running[code] = false;
         return;
-    let zk = new zk_1.default('D2480D');
+    }
+    let zk = new zk_1.default(code);
     zk.task(count);
-    let randTime = utils_1.getRandomInt(10, 3);
-    utils_1.log(`${randTime}分钟以后执行下一次操作`);
+    let randTime = utils_1.getRandomInt(10, 3) * 1000 * 60;
+    utils_1.log(`${randTime / 1000 / 60}分钟以后执行下一次操作`, 'warn');
     setTimeout(() => {
-        run();
-    }, randTime * 1000 * 60);
+        run(code, count);
+    }, randTime);
 }
-run();
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidGVzdC5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uLy4uL3NyYy9jb25zdW1lcnMvemsvdGVzdHMvdGVzdC50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7OztBQUNBLDhDQUF1RDtBQUN2RCwrQ0FBdUI7QUFFdkIsSUFBSSxLQUFLLEdBQUcsQ0FBQyxDQUFDO0FBQ2QsSUFBSSxHQUFHLEdBQUcsR0FBRyxDQUFDO0FBRWQ7SUFDSSxLQUFLLEVBQUUsQ0FBQztJQUNSLElBQUksS0FBSyxHQUFHLEdBQUc7UUFBRSxPQUFPO0lBQ3hCLElBQUksRUFBRSxHQUFHLElBQUksWUFBRSxDQUFDLFFBQVEsQ0FBQyxDQUFDO0lBQzFCLEVBQUUsQ0FBQyxJQUFJLENBQUMsS0FBSyxDQUFDLENBQUM7SUFDZixJQUFJLFFBQVEsR0FBRyxvQkFBWSxDQUFDLEVBQUUsRUFBRSxDQUFDLENBQVcsQ0FBQztJQUM3QyxXQUFHLENBQUMsR0FBRyxRQUFRLGFBQWEsQ0FBQyxDQUFDO0lBQzlCLFVBQVUsQ0FBQyxHQUFHLEVBQUU7UUFDWixHQUFHLEVBQUUsQ0FBQztJQUNWLENBQUMsRUFBRSxRQUFRLEdBQUcsSUFBSSxHQUFHLEVBQUUsQ0FBQyxDQUFDO0FBQzdCLENBQUM7QUFFRCxHQUFHLEVBQUUsQ0FBQyJ9
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidGVzdC5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uLy4uL3NyYy9jb25zdW1lcnMvemsvdGVzdHMvdGVzdC50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7OztBQUFBLCtDQUF1QjtBQUd2QiwyREFBbUM7QUFDbkMsZ0VBQXdDO0FBQ3hDLHNGQUF5RDtBQUN6RCw4Q0FBdUQ7QUFFdkQsSUFBSSxLQUFLLEdBQUcsSUFBSSxlQUFLLEVBQUUsQ0FBQztBQUN4QixJQUFJLEdBQUcsR0FBRyxHQUFHLENBQUM7QUFDZCxJQUFJLE9BQU8sR0FBRyxFQUFFLENBQUE7QUFFaEIsSUFBSSxhQUFHLENBQUM7SUFDSjtRQUNJLE1BQU0sRUFBRSxLQUFLO1FBQ2IsSUFBSSxFQUFFLEdBQUc7UUFDVCxFQUFFLEVBQUUsS0FBSyxFQUFFLEdBQUcsRUFBZ0IsRUFBRTtZQUM1QixJQUFJLEVBQUUsSUFBSSxHQUFHLEVBQUUsRUFBRSxHQUFHLEdBQUcsQ0FBQyxLQUFLLENBQUM7WUFDOUIsSUFBSSxLQUFLLEdBQUcsQ0FBQyxDQUFDO1lBQ2QsSUFBSSxPQUFPLENBQUMsSUFBSSxDQUFDLEVBQUU7Z0JBQ2YsR0FBRyxDQUFDLElBQUksR0FBRyxTQUFTLENBQUM7YUFDeEI7aUJBQU07Z0JBQ0gsR0FBRyxDQUFDLElBQUksRUFBRSxLQUFLLENBQUMsQ0FBQztnQkFDakIsT0FBTyxDQUFDLElBQUksQ0FBQyxHQUFHLElBQUksQ0FBQztnQkFDckIsR0FBRyxDQUFDLElBQUksR0FBRyxPQUFPLENBQUM7YUFDdEI7UUFDTCxDQUFDO0tBQ0o7Q0FDSixDQUFDLENBQUMsTUFBTSxDQUFDLDBCQUFXLENBQUMsRUFBRSxDQUFDLElBQUksRUFBRTtJQUMzQixXQUFHLENBQUMsTUFBTSwwQkFBVyxDQUFDLEVBQUUsQ0FBQyxJQUFJLE9BQU8sQ0FBQyxDQUFDO0FBQzFDLENBQUMsQ0FBQyxDQUFDO0FBR0gsYUFBYSxJQUFJLEVBQUUsS0FBSztJQUNwQixLQUFLLEVBQUUsQ0FBQztJQUNSLElBQUksS0FBSyxHQUFHLEdBQUcsRUFBRTtRQUNiLE9BQU8sQ0FBQyxJQUFJLENBQUMsR0FBRyxLQUFLLENBQUM7UUFDdEIsT0FBTztLQUNWO0lBQ0QsSUFBSSxFQUFFLEdBQUcsSUFBSSxZQUFFLENBQUMsSUFBSSxDQUFDLENBQUM7SUFDdEIsRUFBRSxDQUFDLElBQUksQ0FBQyxLQUFLLENBQUMsQ0FBQztJQUNmLElBQUksUUFBUSxHQUFHLG9CQUFZLENBQUMsRUFBRSxFQUFFLENBQUMsQ0FBVyxHQUFHLElBQUksR0FBRyxFQUFFLENBQUM7SUFDekQsV0FBRyxDQUFDLEdBQUcsUUFBUSxHQUFHLElBQUksR0FBRyxFQUFFLGFBQWEsRUFBRSxNQUFNLENBQUMsQ0FBQztJQUNsRCxVQUFVLENBQUMsR0FBRyxFQUFFO1FBQ1osR0FBRyxDQUFDLElBQUksRUFBRSxLQUFLLENBQUMsQ0FBQztJQUNyQixDQUFDLEVBQUUsUUFBUSxDQUFDLENBQUM7QUFDakIsQ0FBQyJ9

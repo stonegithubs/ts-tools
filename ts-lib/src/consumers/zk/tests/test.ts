@@ -1,20 +1,47 @@
-import colors from 'colors';
-import { getRandomInt, log } from '../../../lib/utils';
 import ZK from '../zk';
 
-let count = 0;
+
+import Koa from '../../../lib/koa';
+import Mongo from '../../../lib/mongo/';
+import reverseConf from '../../../conf/reverseProxyConf';
+import { log, getRandomInt } from '../../../lib/utils';
+
+let mongo = new Mongo();
 let max = 100;
+let running = {}
 
-function run(): void {
+new Koa([
+    {
+        method: 'get',
+        path: '/',
+        cb: async (ctx): Promise<any> => {
+            let { code = '' } = ctx.query;
+            let count = 0;
+            if (running[code]) {
+                ctx.body = '请勿重复添加！';
+            } else {
+                run(code, count);
+                running[code] = true;
+                ctx.body = '添加成功！';
+            }
+        }
+    }
+]).listen(reverseConf.ZK.port, function () {
+    log(`在端口${reverseConf.ZK.port}侦听成功!`);
+});
+
+
+function run(code, count): void {
     count++;
-    if (count > max) return;
-    let zk = new ZK('D2480D');
+    if (count > max) {
+        running[code] = false;
+        return;
+    }
+    let zk = new ZK(code);
     zk.task(count);
-    let randTime = getRandomInt(10, 3) as number;
-    log(`${randTime}分钟以后执行下一次操作`);
+    let randTime = getRandomInt(10, 3) as number * 1000 * 60;
+    log(`${randTime / 1000 / 60}分钟以后执行下一次操作`, 'warn');
     setTimeout(() => {
-        run();
-    }, randTime * 1000 * 60);
+        run(code, count);
+    }, randTime);
 }
-
-run();

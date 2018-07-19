@@ -5,7 +5,7 @@ import { gMail } from '../../lib/mail/utils';
 import Mongo from '../../lib/mongo/';
 import XunDaili, { dynamicForwardURL } from '../../lib/proxy/xundaili';
 import DZ from '../../lib/SMS/dz/';
-import { getRandomInt, getRandomStr, log, throwError, wait } from '../../lib/utils';
+import { getRandomInt, getRandomStr, log, throwError, wait, randomUA } from '../../lib/utils';
 
 //  --------- redis ---------
 
@@ -51,7 +51,7 @@ export default class Epnex {
     Host: 'epnex.io',
     Origin: 'https://epnex.io',
     Referer: 'https://epnex.io/phoneSelf_sign.html?i=00TPBBT&lan=0',
-    'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_1 like Mac OS X) AppleWebKit/603.1.30 (KHTML, like Gecko) Version/10.0 Mobile/14E304 Safari/602.1'
+    'User-Agent': randomUA()
   };
   jar: any; // request cookie jar
   proxy: string = dynamicForwardURL;

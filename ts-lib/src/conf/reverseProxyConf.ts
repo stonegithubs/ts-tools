@@ -7,5 +7,8 @@ export default {
   },
   INVE: {
     port: 26666
+  },
+  ZK: {
+    port: 26667
   }
 }

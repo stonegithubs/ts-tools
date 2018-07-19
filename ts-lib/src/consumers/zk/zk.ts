@@ -4,9 +4,8 @@ import Mongo from '../../lib/mongo/';
 import XunDaili from '../../lib/proxy/xundaili';
 import MyReq from '../../lib/request';
 import DZ from '../../lib/SMS/dz/';
-import { getRandomInt, getRandomStr, log, throwError, wait } from '../../lib/utils';
+import { getRandomInt, getRandomStr, log, throwError, wait, randomUA } from '../../lib/utils';
 import Requester from '../../lib/utils/declarations/requester';
-import rq from 'request';
 
 //  --------- DZ ---------
 
@@ -26,7 +25,7 @@ export default class ZK implements Requester {
     requester: MyReq = new MyReq('', { json: false });
 
     constructor(protected readonly txtCode: string, public txtUserName?:string, public txtPassword?:string) {}
-    async getData(params, uri?, method = 'post', rqParams = {  }): Promise<any> {
+    async getData(params, uri?, method = 'post', rqParams = { json: true }): Promise<any> {
         // let { baseURL } = ZK;
         let  { requester } = this;
         let url = uri || 'https://m.mycchk.com/tools/submit_ajax.ashx' + '?';
@@ -43,14 +42,22 @@ export default class ZK implements Requester {
                 'Origin': 'https://m.mycchk.com',
                 'Pragma': 'no-cache',
                 'Referer': 'https://m.mycchk.com/login.html',
-                'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A372 Safari/604.1'
+                'User-Agent': randomUA()
             },
-            ...rqParams
+            ...rqParams,
+            form: params
         } as any;
         console.log(JSON.parse(JSON.stringify(p)), xdl.wrapParams(JSON.parse(JSON.stringify(p))) );
         return requester.workFlow(url, params, method, //xdl.wrapParams(
             p
-        )
+    //    )
+        ).then(data => {
+            try {
+                return typeof data === 'string' ? JSON.parse(data) : data;
+            } catch (error) {
+                return data;
+            }
+        })
     }
     async sendMSG(): Promise<any> {
         let mb;
@@ -108,41 +115,51 @@ export default class ZK implements Requester {
     }
 
     async task(id?):Promise<any> {
-        log(`任务\t${id}\t开始！`);
-        let mobileAndCode = await this.sendMSG();
-        log('短信以获取', mobileAndCode);
-        let { txtCode } = this;
-        let regParams = {
-            ...mobileAndCode,
-            txtUserName:  getRandomStr(16, 14),
-            txtPassword: `${getRandomStr(6)}and${(getRandomInt(9, 0, 6) as number[]).join('')}`,
-            txtCode,
-        }
-        log('开始注册');
-        let regResult;
         do {
-            try {
-                regResult = await this.register(regParams);
-                if (regResult.status === 1) {
-                    break;
-                } else if (regResult.status === 0 && regResult.msg === '对不起，该用户名称已被登记，请更新用户名称再次重注册。如是本人操作,请直接登入。') {
-                    regParams.txtUserName = getRandomStr(16, 14);
-                    throwError(regResult);
+            begin: {
+
+                log(`任务\t${id}\t开始！`);
+                let mobileAndCode = await this.sendMSG();
+                log('短信以获取', mobileAndCode);
+                let { txtCode } = this;
+                let regParams = {
+                    ...mobileAndCode,
+                    txtUserName:  getRandomStr(16, 14),
+                    txtPassword: `${getRandomStr(6)}and${(getRandomInt(9, 0, 6) as number[]).join('')}`,
+                    txtCode,
                 }
-            } catch (error) {
-                log(error, 'error');
+                log('开始注册');
+                let regResult;
+                do {
+                    try {
+                        regResult = await this.register(regParams);
+                        if (regResult.status === 1) {
+                            break;
+                        } else if (regResult.status === 0 && regResult.msg === '对不起，该用户名称已被登记，请更新用户名称再次重注册。如是本人操作,请直接登入。') {
+                            regParams.txtUserName = getRandomStr(16, 14);
+                            throwError(regResult);
+                        } else if (regResult.status === 0 && regResult.msg === '您输入的验证码与系统的不一致！') {
+                            break begin;
+                        }
+                    } catch (error) {
+                        log(error, 'error');
+                    }
+                } while (await wait(2000, true));
+                log('注册完成', regResult);
+                if (regResult.status === 1) {
+                    try {
+                        this.getData({}, 'https://m.mycchk.com/user/center/index.html', 'get', { json: false });
+                    } catch (error) {
+                        // log('获取首页，错误无需关注！', error, 'error');
+                    }
+                }
+                log(`任务\t${id}\t完成`, 'warn');
+                let col = await mongo.getCollection('zk', 'regists');
+                col.insertOne(regParams);
+                return;
             }
+
         } while (await wait(2000, true));
-        log('注册完成', regResult);
-        if (regResult.status === 1) {
-            try {
-                this.getData({}, 'https://m.mycchk.com/user/center/index.html', 'get', { json: false });
-            } catch (error) {
-                // log('获取首页，错误无需关注！', error, 'error');
-            }
-        }
-        log(`任务\t${id}\t完成`, 'warn');
-        let col = await mongo.getCollection('zk', 'regists');
-        col.insertOne(regParams);
+
     }
 }

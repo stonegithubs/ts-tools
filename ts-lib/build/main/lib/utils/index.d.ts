@@ -11,3 +11,4 @@ export declare function getRandomStr(maxLen?: number, minLen?: number, chars?: s
 export declare function log(...rest: any[]): void;
 export declare function buildURL(uri?: string, query?: {}): string;
 export declare function until(cb: any): void;
+export declare function randomUA(): string;

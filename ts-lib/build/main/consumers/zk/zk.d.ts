@@ -7,7 +7,9 @@ export default class ZK implements Requester {
     static baseURL: 'https://m.mycchk.com/tools/submit_ajax.ashx';
     requester: MyReq;
     constructor(txtCode: string, txtUserName?: string, txtPassword?: string);
-    getData(params: any, uri?: any, method?: string, rqParams?: {}): Promise<any>;
+    getData(params: any, uri?: any, method?: string, rqParams?: {
+        json: boolean;
+    }): Promise<any>;
     sendMSG(): Promise<any>;
     register(params: any): Promise<any>;
     login(): Promise<any>;
