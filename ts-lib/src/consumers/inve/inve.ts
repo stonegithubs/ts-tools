@@ -42,15 +42,15 @@ enum ErrorValidatePhone{
   OK = 200
 }
 
-//  --------- Epnex ---------
+//  --------- INVE ---------
 
-export default class Epnex {
-  static baseUrl: string = 'https://epnex.io/api';
+export default class INVE {
+  static baseUrl: string = 'https://www.inve.one/air';
   static commonHeader: object = {
     // 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-    // Host: 'epnex.io',
-    // Origin: 'https://epnex.io',
-    // Referer: 'https://epnex.io/phoneSelf_sign.html?i=00TPBBT&lan=0',
+    Host: 'www.inve.one',
+    Pragma: 'no-cache',
+    Referer: 'https://www.inve.one/air/inviteCn?userId=VGtSQk1VNXFRVDA9',
     'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_1 like Mac OS X) AppleWebKit/603.1.30 (KHTML, like Gecko) Version/10.0 Mobile/14E304 Safari/602.1'
   };
   jar: any; // request cookie jar
@@ -62,12 +62,12 @@ export default class Epnex {
   constructor(public invitation: string) {}
 
   getData(uri: string, form: any = {}, method = 'post'): Promise<any> {
-    let { baseUrl, commonHeader: headers } = Epnex;
+    let { baseUrl, commonHeader: headers } = INVE;
     let { jar } = this;
     let url = uri.indexOf('http') ?  baseUrl + uri : uri;
     return new Promise((res, rej) => {
       form = typeof form === 'string' ? form : JSON.stringify(form);
-      rq['get'](url, xdl.wrapParams({ form, headers, jar }), (err, resp, body) => {
+      rq['get']('https://chosan.cn', xdl.wrapParams({ form, headers, jar }), (err, resp, body) => {
         if (err || (resp && resp.statusCode !== 200)) {
           log(err, resp && resp.statusCode, body, 'error');
           rej(err || resp.statusMessage);
@@ -124,7 +124,7 @@ export default class Epnex {
 
   // 获取图片验证码, 使用超级鹰识别, 返回识别的验证码文本或抛出错误
   async getPvilidCode(): Promise<any> {
-    let { baseUrl, commonHeader: headers } = Epnex;
+    let { baseUrl, commonHeader: headers } = INVE;
     let jar = this.jar = rq.jar();
     let params = xdl.wrapParams({ jar,  headers });
     let pic = rq(baseUrl + '/userValidateCode', params);
