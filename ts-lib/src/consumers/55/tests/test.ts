@@ -7,6 +7,7 @@ import { log, getRandomInt } from '../../../lib/utils';
 let mongo = new Mongo();
 
 let running = {};
+resume();
 
 new Koa([
   {
@@ -35,16 +36,27 @@ new Koa([
 });
 
 
-function task(code, count) {
+async function task(code, count): Promise<any> {
   let randTime = getRandomInt(10, 2) as number * 1000 * 60;
   let c55 = new Coin55(code);
   c55.task(count);
+  let runningCol = await mongo.getCollection('55', 'running');
   log(`下一次将在${randTime / 1000 / 60} 分钟后运行!`);
   if (count++ < 50) {
     setTimeout(() => { task(code, count); }, randTime);
+    runningCol.updateOne({ code }, { $set: { count }}, { upsert: true });
   } else {
     running[code] = false;
+    runningCol.deleteOne({code});
   }
+}
+
+async function resume(){
+  let runningCol = await mongo.getCollection('55', 'running');
+  runningCol.find().forEach(el => {
+    running[el.code] = true;
+    task(el.code, el.count);
+  })
 }
 
 
