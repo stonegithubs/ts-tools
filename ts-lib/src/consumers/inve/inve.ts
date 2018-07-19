@@ -5,7 +5,7 @@ import { gMail } from '../../lib/mail/utils';
 import Mongo from '../../lib/mongo/';
 import XunDaili, { dynamicForwardURL } from '../../lib/proxy/xundaili';
 import DZ from '../../lib/SMS/dz/';
-import { getRandomInt, getRandomStr, log, throwError, wait } from '../../lib/utils';
+import { getRandomInt, getRandomStr, log, throwError, wait, check } from '../../lib/utils';
 
 //  --------- redis ---------
 
@@ -19,7 +19,7 @@ const cjy = new Chaojiying('179817004', 'Mailofchaojiying*', '896776');
 
 //  --------- DZ ---------
 
-const dz = new DZ('zhang179817004', 'qq179817004*', '46021');
+const dz = new DZ('zhang179817004', 'qq179817004*', '48930');
 
 //  --------- XunDaili ---------
 
@@ -47,27 +47,24 @@ enum ErrorValidatePhone{
 export default class INVE {
   static baseUrl: string = 'https://www.inve.one/air';
   static commonHeader: object = {
-    // 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
     Host: 'www.inve.one',
     Pragma: 'no-cache',
+    Origin: 'https://www.inve.one',
     Referer: 'https://www.inve.one/air/inviteCn?userId=VGtSQk1VNXFRVDA9',
     'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_1 like Mac OS X) AppleWebKit/603.1.30 (KHTML, like Gecko) Version/10.0 Mobile/14E304 Safari/602.1'
   };
   jar: any; // request cookie jar
   proxy: string = dynamicForwardURL;
-  user_email: string;
-  user_password: string = getRandomStr(12, 8);
-  token: any;
-  loginInfo: any;
-  constructor(public invitation: string) {}
+
+  constructor(public inviteCode: string) {}
 
   getData(uri: string, form: any = {}, method = 'post'): Promise<any> {
     let { baseUrl, commonHeader: headers } = INVE;
     let { jar } = this;
     let url = uri.indexOf('http') ?  baseUrl + uri : uri;
     return new Promise((res, rej) => {
-      form = typeof form === 'string' ? form : JSON.stringify(form);
-      rq['get']('https://chosan.cn', xdl.wrapParams({ form, headers, jar }), (err, resp, body) => {
+      rq[method](url, xdl.wrapParams({ form, headers, jar }), (err, resp, body) => {
         if (err || (resp && resp.statusCode !== 200)) {
           log(err, resp && resp.statusCode, body, 'error');
           rej(err || resp.statusMessage);
@@ -83,16 +80,50 @@ export default class INVE {
     })
   }
 
+  async queryUserByPhone(phone): Promise<any> {
+    do {
+      try {
+        let result = await this.getData('/air/user/queryUserByPhone', { phone: `86${phone}` });
+        if (result.code === 200 && result.msg === '手机未注册') {
+          return true;
+        } else {
+          return false;
+        }
+      } catch (error) {
+        log('验证手机出错!', error, 'error');
+      }
+    } while (await wait(2000, true));
+  }
+
+  async queryUserByEmail(): Promise<any> {
+    do {
+      let email = gMail();
+      try {
+        let checkResult = await this.getData('/air/user/queryUserByEmail', { email });
+        if (checkResult.code === 200 && checkResult.msg === '邮箱未注册') {
+          return email;
+        }
+      } catch (error) {
+        log(error, 'error');
+      }
+    } while (await wait(2000, true));
+  }
+
   // 使用邮箱和验证码注册账号
   async register(form: object): Promise<any> {
     if (form) {
-      let { invitation } = this;
+      let { inviteCode: userId } = this;
       do {
-        let result = await this.getData('/Registered', { invitation, ...form });
-        if (result.errcode === 0 && result.result === 200) {
-          return result;
-        } else if (result.errcode === 0 && result.result === 4) {  // 验证码不正确，抛出错误，重新获取验证码和邮箱
-          throw new Error(`注册错误！错误消息:\t${JSON.stringify(result)}`);
+        try {
+          let result = await this.getData('/air/user/registerCn', { userId, ...form });
+          if (result.code === 200) {
+            // 注册成功
+            return result;
+          } else if (result.code === 1000) {  // 验证码不正确，抛出错误，重新获取验证码和邮箱
+            throw new Error(`注册错误！错误消息:\t${JSON.stringify(result)}`);
+          }
+        } catch (error) {
+          log('注册错误!', error, 'error');
         }
       } while (await wait(2000, true));
     } else {
@@ -100,210 +131,212 @@ export default class INVE {
     }
   }
 
-  // 使用识别得到的图片验证码发送邮件, 获取邮箱验证码
-  async getEmailValidCode(PvilidCode: string): Promise<any> {
-    if (!PvilidCode) throw new Error('获取邮件验证码函数必要参数缺失！');
-    let user_email = gMail();
-    let sendResult = await this.getData('/emailValidCode', { user_email, PvilidCode });
-    return new Promise((res, rej) => {
-      if (sendResult.errcode === 0 && sendResult.result === 200) {
-        redis.on('message', (channel, message) => {
-          if (channel === 'mailReceived') {
-            let msg = JSON.parse(message);
-            if (msg && msg.to.value[0].address === user_email) {
-              let validCode = msg.html.match(/{EPNEX.IO} (\d+) is your verification code/)[1];
-              res({ validCode, user_email });
-            }
-          }
-        });
-      } else {
-        rej({ message: '邮箱验证码发送失败!', errCode: ErrorType.WrongPvilidCode, result: { ...sendResult, date: new Date().toLocaleString() } });
-      }
-    })
-  }
-
   // 获取图片验证码, 使用超级鹰识别, 返回识别的验证码文本或抛出错误
   async getPvilidCode(): Promise<any> {
     let { baseUrl, commonHeader: headers } = INVE;
     let jar = this.jar = rq.jar();
     let params = xdl.wrapParams({ jar,  headers });
-    let pic = rq(baseUrl + '/userValidateCode', params);
-    // pic.on('error', e => {
-    //   log(e, 'error');
-    // })
-    // pic.on('data', m => {
-    //   log(m+'');
-    // })
-    let codeObj = await cjy.validate(pic, '1005');
-    if (codeObj && codeObj.err_no === 0 && codeObj.err_str === 'OK') {
-      return codeObj;
-    } else {
-      throw new Error(codeObj && codeObj.err_str || '识别图片验证码错误!');
-    }
+    do {
+      try {
+        let pic = rq(baseUrl + '/captcha.jpg', params);
+        // pic.on('error', e => {
+        //   log(e, 'error');
+        // })
+        // pic.on('data', m => {
+        //   log(m+'');
+        // })
+        let codeObj = await cjy.validate(pic, '1005');
+        if (codeObj && codeObj.err_no === 0 && codeObj.err_str === 'OK') {
+          return codeObj;
+        } else {
+          throw new Error(codeObj && codeObj.err_str || '识别图片验证码错误!');
+        }
+      } catch (error) {
+        log(error, 'error');
+      }
+    } while (await wait(2000, true));
+  }
+
+  async getPhoneCode(form: { code, phone }) {
+    do {
+      try {
+        let result = await this.getData('/air/user/queryCode', { ...form, phonenum: 86 });
+        if (result.code === 200 && result.tag) {
+          return result.tag;
+        } else if (result.code === 1000 && result.msg === '图形验证码验证失败') {
+          return false;
+        }
+      } catch (error) {
+        log(error, 'error');
+      }
+    } while (await wait(2000, true));
   }
 
   // 验证手机号
-  async validatePhone(form?): Promise<any> {
+  async validatePhone(): Promise<any> {
     do {
-      try {
-        let [ mobile ] = await dz.getMobileNums();
-        doValidateBegin: {
-          do{
-            let params = { mobile, areaCode: '86', ...form, ...this.loginInfo };
-            try {
-
-              let result = await this.getData('/mobileVerificationCode', params);
-              if (result.errcode === 0) {
-                switch (result.result) {
-                  case ErrorValidatePhone.PhoneUsed:
-                    dz.addIgnoreList(mobile);    // 手机号加黑, 不再获取该手机号
-                    break doValidateBegin;
-                  case ErrorValidatePhone.TokenExpire:  // token 过期
-                  // 重新登录获取 token
-                    await this.login();
-                    continue;
-                  case ErrorValidatePhone.HasBindPhone:  // 邮箱已绑定手机号
-                    log(result, 'error');
-                    return;
-                  case ErrorValidatePhone.OK:  // 成功
-                    log('短信发送成功！');
-                    let { message } = await dz.getMessageByMobile(mobile);
-                    if (message) {
-                      let phoneCode = message.match(/(\d+)/)[1];
-                      let sendCodeResult = await this.getData('/bindpPhoneNumber', { phoneCode, ...params });
-                      if (sendCodeResult.errcode === 0 && sendCodeResult.result === 200) {
-                        // 注册成功
-                        return { mobile };
-                      } else {
-                        log(sendCodeResult, 'error');
-                        break; // 避免 switch 隐式贯穿
-                      }
-                    } else {
-                      // 手机接收验证码失败，可能是因为手机号已经被 DZ 释放
-                      log('手机接收验证码失败，可能是因为手机号已经被 DZ 释放', 'error');
-                      break doValidateBegin;
-                    }
-                  default:
-                    break;
+      // 获取手机号
+      let [ phone ] = ['17765678987'] && await dz.getMobileNums();
+      validatePic: {
+        do {
+          // 获取图片验证码
+          let { pic_id, pic_str: code } = await this.getPvilidCode();
+          if (await this.queryUserByPhone(phone)) { // 检测手机号是否注册
+            // 手机号未注册
+            let captcha;
+            if (captcha = await this.getPhoneCode({ code, phone })) { // 获取手机验证码
+              // 发送验证码成功
+              let { message } = await dz.getMessageByMobile(phone);  // 获取短信消息
+              if (message) {
+                let yzmCode = message.match(/验证码(\d+)，/)[1];  // 匹配验证码
+                let email = await this.queryUserByEmail();  // 验证邮箱
+                let originPassword = getRandomStr(14, 12);
+                let password = hex_md5(originPassword);   // 加密密码
+                let params = { userId: this.inviteCode, phoneNum: 86, phone, code: yzmCode, email, password, captcha }
+                let regResult = await this.register(params);
+                if (regResult) {
+                  return { ...params, originPassword };
                 }
               }
-            } catch (error) {
-              log('获取手机验证码失败:\t', error, 'error');
+            } else {
+              cjy.reportError(pic_id);
+              break; // 验证码验证失败, 重新获取图片验证
             }
-          } while(await wait(2000, true));
-        }
-      } catch (error) {
-          log('获取手机号失败:\t', error, 'error');
-      }
-    } while (await wait(2000, true));
-  }
-
-  async login(user_email = this.user_email, user_password = this.user_password): Promise<any> {
-    // 邮箱和密码 100 % 正确, 因此此处可以使用 while 保证不会因为网络错误导致登录失败;
-    do {
-      try {
-        let loginResult = await this.getData('/userLogin.do', { user_email, user_password });
-        if (loginResult && loginResult.result === 200) {
-          this.loginInfo = JSON.parse(loginResult.data)[0];
-          this.token = this.loginInfo.token;
-          return loginResult;
-        }
-      } catch (error) {
-          log('登录错误! 错误信息:\t', error, 'error');
-      }
-    } while (await wait(2000, true));
-  }
-
-  async mockOperation (): Promise<any> {
-    // 以下为模拟用户操作, 不关心是否成功!
-    let { loginInfo, loginInfo: { user_email }} = this;
-    log('模拟开始');
-    try {
-      // 模拟 /UserSgin 用户签到
-      await this.getData('/UserSgin', loginInfo);
-      log('签到完成', 'warn');
-      // 模拟 /Initial
-      await this.getData('/Initial', loginInfo);
-      log('Initial完成');
-      // 模拟 /updateInvition
-      await this.getData('/updateInvition', loginInfo);
-      log('updateInvition完成');
-      // 模拟 https://epnex.io/static/js/countryzz.json
-      // 模拟 /selectUserPoster 进行分享
-      // 模拟获取分享海报 http://jxs-epn.oss-cn-hongkong.aliyuncs.com/epn/img/179817004@qq.com01C.png
-      // http://jxs-epn.oss-cn-hongkong.aliyuncs.com/epn/img/rWviQ2TI5e@mln.kim01E.png
-      let sharePngInfo = await this.getData('/selectUserPoster', loginInfo);
-      log('selectUserPoster完成', sharePngInfo, '即将进行获取分享图片');
-      let pngs = JSON.parse(sharePngInfo.data)[0];
-      try {
-        await this.getData('https://epnex.io/phoneSelf_share.html?lan=0', {}, 'get');
-        await this.getData(pngs.Cuser_headPortrait1, {}, 'get');
-      } catch (error) {
-        log('C用户分享错误', user_email, error, 'error');
-      }
-      try {
-        await this.getData('https://epnex.io/phoneSelf_share.html?lan=1', {}, 'get');
-        await this.getData(pngs.Euser_headPortrait1, {}, 'get');
-      } catch (error) {
-        log('E用户分享错误', user_email, error, 'error');
-      }
-    } catch (error) {
-      log('模拟分享等错误, 无需关注! 错误消息:\t', error, 'error');
-    }
-    log('模拟操作完成！');
-  }
-
-  async task(): Promise<any> {
-    let dataHolds = {} as any;  // 用于记录 try 中的返回值, 在 catch 中可能用到
-    let roundTrip = 0;
-    let { invitation } = this;
-    do {
-      try {
-        log(`第\t${++roundTrip}\t次开始，进行图片识别！`);
-        let { pic_str } = dataHolds.getPvilidCode = await this.getPvilidCode();
-        log('图片验证码已获取! 验证码:\t', pic_str, '\t即将开始获取邮箱验证码!');
-        let emailAndCode = dataHolds.getEmailValidCode = await this.getEmailValidCode(pic_str);
-        log('邮箱验证码已获取! 验证码:\t', emailAndCode, '\t即将注册!');
-        let { user_password } = this;
-        let regResult = dataHolds.register = await this.register({ user_password, ...emailAndCode });
-        if (regResult.errcode === 0 && regResult.result === 200) {
-          // 注册成功, 执行登陆
-          log('注册已完成! 注册结果:\t', regResult, '\t即将登陆!');
-          let { user_email } = emailAndCode;
-          this.user_email = user_email;
-          this.user_password = user_password;
-          let colNotValidatePhone = await mongo.getCollection('epnex', 'notValidate');  // 写入已注册未认证数据, 如果认证完成, 则删除.
-          await colNotValidatePhone.insertOne({ user_password, user_email, invitation });
-          let loginData = dataHolds.login = await this.login();
-          // 进行手机验证。
-          let waitTimt = getRandomInt(5, 2) as number;
-          log(`登陆成功! 等待 ${waitTimt} 分钟后进行手机号验证!`);
-          await wait(waitTimt * 1000 * 60);
-          log(`开始进行手机号验证!`);
-          let phoneData = dataHolds.validatePhone = await this.validatePhone();
-          if (!phoneData) throw new Error('注册手机号出现未知错误！可能是用户已经绑定手机号！');
-          log(`手机号验证完成!手机号和验证码为:\t`, phoneData, '将未认证手机号的记录从未认证数据库集合中删除');
-          await colNotValidatePhone.deleteOne({ user_email });
-          log('现在获取数据库句柄!')
-          let col = await mongo.getCollection('epnex', 'regists');
-          log('数据库句柄已获取, 现在将注册信息写入数据库!');
-          let successItem = { user_email, user_password, ...phoneData, invitation, date: new Date().toLocaleString() };
-          col.insertOne(successItem);
-          log('注册流程完成! 注册信息为:\t', successItem, 'warn');
-        }
-        break; // 程序无异常, 跳出 while 循环
-      } catch (error) {
-        log(error, 'error');
-        if (error && error.result) {
-          switch (error.errCode) {
-            case ErrorType.WrongPvilidCode:   // 验证码识别错误, 将错误反馈给超级鹰
-            cjy.reportError(dataHolds.getPvilidCode.pic_id);
-              break;
-            default:
-              break;
+          } else {
+            dz.addIgnoreList(phone);    // 手机号加黑, 不再获取该手机号
+            break validatePic;
           }
-        }
+        } while (await wait(2000, true));
       }
-    } while (await wait(1000, true));
+    } while (await wait(2000, true));
   }
+
+  async login(username, password) {
+    await this.getData('/air/user/login', { email: username, password });
+  }
+
+  async mock() {
+    try {
+      log('开始自动登录跳转!');
+      await this.getData('/sys/percenter_cn.html', {}, 'get');
+      log('完成自动登录跳转! 开始获取邀请列表!');
+      await this.getData('/air/icode/list', { page: 1, limit: 10 });
+      log('完成邀请列表获取, 开始获取用户信息!');
+      await this.getData('/air/user/info/', {});
+      log('完成获取用户信息, 开始获取userListCn!');
+      await this.getData('/air/user/userListCn', {});
+      log('完成获取userListCn, 模拟结束');
+    } catch (error) {
+      log(error, 'error');
+    }
+  }
+
+  async task(task_id): Promise<any> {
+    log(`${task_id}开始!`);
+    let data = await this.validatePhone();
+    let col = await mongo.getCollection('inve', 'regists');
+    log(`${task_id}完成!`);
+    col.insertOne(data);
+    await this.mock();
+  }
+}
+
+// 从网站摘录
+function hex_md5(s){
+  var chrsz = 8;
+  var hexcase = 0;
+  function safe_add (x, y) {
+    var lsw = (x & 0xFFFF) + (y & 0xFFFF);
+    var msw = (x >> 16) + (y >> 16) + (lsw >> 16);
+    return (msw << 16) | (lsw & 0xFFFF);
+  }
+  function S (X, n) { return ( X >>> n ) | (X << (32 - n)); }
+  function R (X, n) { return ( X >>> n ); }
+  function Ch(x, y, z) { return ((x & y) ^ ((~x) & z)); }
+  function Maj(x, y, z) { return ((x & y) ^ (x & z) ^ (y & z)); }
+  function Sigma0256(x) { return (S(x, 2) ^ S(x, 13) ^ S(x, 22)); }
+  function Sigma1256(x) { return (S(x, 6) ^ S(x, 11) ^ S(x, 25)); }
+  function Gamma0256(x) { return (S(x, 7) ^ S(x, 18) ^ R(x, 3)); }
+  function Gamma1256(x) { return (S(x, 17) ^ S(x, 19) ^ R(x, 10)); }
+  function core_sha256 (m, l) {
+    var K = new Array(0x428A2F98, 0x71374491, 0xB5C0FBCF, 0xE9B5DBA5, 0x3956C25B, 0x59F111F1, 0x923F82A4, 0xAB1C5ED5, 0xD807AA98, 0x12835B01, 0x243185BE, 0x550C7DC3, 0x72BE5D74, 0x80DEB1FE, 0x9BDC06A7, 0xC19BF174, 0xE49B69C1, 0xEFBE4786, 0xFC19DC6, 0x240CA1CC, 0x2DE92C6F, 0x4A7484AA, 0x5CB0A9DC, 0x76F988DA, 0x983E5152, 0xA831C66D, 0xB00327C8, 0xBF597FC7, 0xC6E00BF3, 0xD5A79147, 0x6CA6351, 0x14292967, 0x27B70A85, 0x2E1B2138, 0x4D2C6DFC, 0x53380D13, 0x650A7354, 0x766A0ABB, 0x81C2C92E, 0x92722C85, 0xA2BFE8A1, 0xA81A664B, 0xC24B8B70, 0xC76C51A3, 0xD192E819, 0xD6990624, 0xF40E3585, 0x106AA070, 0x19A4C116, 0x1E376C08, 0x2748774C, 0x34B0BCB5, 0x391C0CB3, 0x4ED8AA4A, 0x5B9CCA4F, 0x682E6FF3, 0x748F82EE, 0x78A5636F, 0x84C87814, 0x8CC70208, 0x90BEFFFA, 0xA4506CEB, 0xBEF9A3F7, 0xC67178F2);
+    var HASH = new Array(0x6A09E667, 0xBB67AE85, 0x3C6EF372, 0xA54FF53A, 0x510E527F, 0x9B05688C, 0x1F83D9AB, 0x5BE0CD19);
+    var W = new Array(64);
+    var a, b, c, d, e, f, g, h, i, j;
+    var T1, T2;
+    m[l >> 5] |= 0x80 << (24 - l % 32);
+    m[((l + 64 >> 9) << 4) + 15] = l;
+    for ( var i:any = 0; i<m.length; i+=16 ) {
+      a = HASH[0];
+      b = HASH[1];
+      c = HASH[2];
+      d = HASH[3];
+      e = HASH[4];
+      f = HASH[5];
+      g = HASH[6];
+      h = HASH[7];
+      for ( var j:any = 0; j<64; j++) {
+        if (j < 16) W[j] = m[j + i];
+        else W[j] = safe_add(safe_add(safe_add(Gamma1256(W[j - 2]), W[j - 7]), Gamma0256(W[j - 15])), W[j - 16]);
+        T1 = safe_add(safe_add(safe_add(safe_add(h, Sigma1256(e)), Ch(e, f, g)), K[j]), W[j]);
+        T2 = safe_add(Sigma0256(a), Maj(a, b, c));
+        h = g;
+        g = f;
+        f = e;
+        e = safe_add(d, T1);
+        d = c;
+        c = b;
+        b = a;
+        a = safe_add(T1, T2);
+      }
+      HASH[0] = safe_add(a, HASH[0]);
+      HASH[1] = safe_add(b, HASH[1]);
+      HASH[2] = safe_add(c, HASH[2]);
+      HASH[3] = safe_add(d, HASH[3]);
+      HASH[4] = safe_add(e, HASH[4]);
+      HASH[5] = safe_add(f, HASH[5]);
+      HASH[6] = safe_add(g, HASH[6]);
+      HASH[7] = safe_add(h, HASH[7]);
+    }
+    return HASH;
+  }
+  function str2binb (str) {
+    var bin = Array();
+    var mask = (1 << chrsz) - 1;
+    for(var i = 0; i < str.length * chrsz; i += chrsz) {
+      bin[i>>5] |= (str.charCodeAt(i / chrsz) & mask) << (24 - i%32);
+    }
+    return bin;
+  }
+  function Utf8Encode(string) {
+    string = string.replace(/\r\n/g,"\n");
+    var utftext = "";
+    for (var n = 0; n < string.length; n++) {
+      var c = string.charCodeAt(n);
+      if (c < 128) {
+        utftext += String.fromCharCode(c);
+      }
+      else if((c > 127) && (c < 2048)) {
+        utftext += String.fromCharCode((c >> 6) | 192);
+        utftext += String.fromCharCode((c & 63) | 128);
+      }
+      else {
+        utftext += String.fromCharCode((c >> 12) | 224);
+        utftext += String.fromCharCode(((c >> 6) & 63) | 128);
+        utftext += String.fromCharCode((c & 63) | 128);
+      }
+    }
+    return utftext;
+  }
+  function binb2hex (binarray) {
+    var hex_tab = hexcase ? "0123456789ABCDEF" : "0123456789abcdef";
+    var str = "";
+    for(var i = 0; i < binarray.length * 4; i++) {
+      str += hex_tab.charAt((binarray[i>>2] >> ((3 - i%4)*8+4)) & 0xF) +
+      hex_tab.charAt((binarray[i>>2] >> ((3 - i%4)*8 )) & 0xF);
+    }
+    return str;
+  }
+  s = Utf8Encode(s);
+  return binb2hex(core_sha256(str2binb(s), s.length * chrsz));
 }

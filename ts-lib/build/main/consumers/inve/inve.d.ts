@@ -1,20 +1,21 @@
 export default class INVE {
-    invitation: string;
+    inviteCode: string;
     static baseUrl: string;
     static commonHeader: object;
     jar: any;
     proxy: string;
-    user_email: string;
-    user_password: string;
-    token: any;
-    loginInfo: any;
-    constructor(invitation: string);
+    constructor(inviteCode: string);
     getData(uri: string, form?: any, method?: string): Promise<any>;
+    queryUserByPhone(phone: any): Promise<any>;
+    queryUserByEmail(): Promise<any>;
     register(form: object): Promise<any>;
-    getEmailValidCode(PvilidCode: string): Promise<any>;
     getPvilidCode(): Promise<any>;
-    validatePhone(form?: any): Promise<any>;
-    login(user_email?: string, user_password?: string): Promise<any>;
-    mockOperation(): Promise<any>;
-    task(): Promise<any>;
+    getPhoneCode(form: {
+        code: any;
+        phone: any;
+    }): Promise<any>;
+    validatePhone(): Promise<any>;
+    login(username: any, password: any): Promise<void>;
+    mock(): Promise<void>;
+    task(task_id: any): Promise<any>;
 }

@@ -5,5 +5,8 @@ declare const _default: {
     coin55: {
         port: number;
     };
+    INVE: {
+        port: number;
+    };
 };
 export default _default;
