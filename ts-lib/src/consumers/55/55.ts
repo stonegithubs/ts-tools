@@ -3,7 +3,7 @@ import Mongo from '../../lib/mongo/';
 import XunDaili from '../../lib/proxy/xundaili';
 import MyReq from '../../lib/request';
 import DZ from '../../lib/SMS/dz/';
-import { buildURL, wait, log, getRandomStr, getRandomInt, throwError } from '../../lib/utils';
+import { buildURL, wait, log, getRandomStr, getRandomInt, throwError, randomUA } from '../../lib/utils';
 
 //  --------- DZ ---------
 
@@ -31,7 +31,7 @@ export default class Coin55 implements Requester {
       Pragma: 'no-cache',
       Referer: `https://www.55.com/login/sigin_up.html?code=${code}`,
       'X-Requested-With': 'XMLHttpRequest',
-      'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A372 Safari/604.1'
+      'User-Agent': randomUA()
     };
     return requester.workFlow(newPath, data, method, xdl.wrapParams({ ...params, headers }));
   }
