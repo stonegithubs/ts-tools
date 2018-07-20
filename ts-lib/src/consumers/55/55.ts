@@ -31,7 +31,7 @@ export default class Coin55 implements Requester {
       Pragma: 'no-cache',
       Referer: `https://www.55.com/login/sigin_up.html?code=${code}`,
       'X-Requested-With': 'XMLHttpRequest',
-      'User-Agent': randomUA()
+      'User-Agent':     'Mozilla/5.0 (Linux; U; Android 6.0.1; zh-CN; SM-C7000 Build/MMB29M) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/40.0.2214.89 UCBrowser/11.6.2.948 Mobile Safari/537.36' || randomUA()
     };
     return requester.workFlow(newPath, data, method, xdl.wrapParams({ ...params, headers }));
   }

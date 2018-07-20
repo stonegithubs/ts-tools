@@ -31,7 +31,6 @@ new Koa([
     }
   }
 ]).listen(reverseConf.coin55.port, function() {
-  log('e:\t', arguments);
   log(`在端口${reverseConf.coin55.port}侦听成功!`);
 });
 

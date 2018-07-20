@@ -1,16 +1,26 @@
 import { MongoClient } from 'mongodb';
 import { check } from '../utils';
 
-export default class ClientManager{
+export default class MongoClientManager{
   static connections: Map<string, any> = new Map();
+  static async store(dbName, colName, docs: object | object[], opts?, url: string = 'mongodb://localhost:27017') {
+    let { connections } = MongoClientManager;
+    let con = connections.get(url);
+    if (con) {
+      await con.db(dbName).collection(colName).insert(docs, opts);
+    } else {
+      let col = await new MongoClientManager(url).getCollection(dbName, colName);
+      return col.insert(docs, opts);
+    }
+  }
   static closeAll(): void {
-    let { connections } = ClientManager;
+    let { connections } = MongoClientManager;
     for (const con of connections.values()) {
       con && con.close();
     }
   }
   constructor(public url: string = 'mongodb://localhost:27017') {
-    let { connections } = ClientManager;
+    let { connections } = MongoClientManager;
     let con = connections.get(url);
     if (con) {
       return con;
@@ -21,7 +31,7 @@ export default class ClientManager{
 
   connect(): Promise<any> {
     return new Promise((res, rej) => {
-      const { connections } = ClientManager;
+      const { connections } = MongoClientManager;
       const { url } = this;
       const con = connections.get(url);
       if (con) {
@@ -38,11 +48,11 @@ export default class ClientManager{
   }
 
   close(): void {
-    ClientManager.connections[this.url].close();
+    MongoClientManager.connections[this.url].close();
   }
 
   getConnection(): Promise<any> {
-    return check(() => ClientManager.connections.get(this.url));
+    return check(() => MongoClientManager.connections.get(this.url));
   }
 
   async getDB(dbName: string): Promise<any> {
@@ -54,4 +64,5 @@ export default class ClientManager{
     let con = await this.getConnection();
     return con.db(dbName).collection(colName);
   }
+
 }
