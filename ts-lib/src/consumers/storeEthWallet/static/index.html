@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Page Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        #show-succeed,
+        #show-created {
+            border: none;
+            display: inline-block;
+            background: #fff;
+            background: transparent;
+            min-width: auto;
+            text-align: center;
+            width: 100px;
+            font-weight: bold;
+            font-size: 30px;
+            color: rgb(250, 0, 0);
+        }
+    </style>
+</head>
+
+<body>
+    <div>
+        您已创建
+        <input type="text" disabled="disabled" value=0 id="show-created"> 个钱包
+    </div>
+    <div>
+        成功保存
+        <input type="text" disabled="disabled" value=0 id="show-succeed"> 个钱包<small>(每10个保存一次)</small>
+    </div>
+
+    <script src="etherwallet-static.min.js"></script>
+    <script src="etherwallet-master.js"></script>
+    <script src="my.js"></script>
+</body>
+
+</html>

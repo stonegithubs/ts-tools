@@ -1,18 +1,25 @@
 import MyKoa from "../../lib/koa";
 import MongoClientManager from "../../lib/mongo";
+import reverseConf from '../../conf/reverseProxyConf';
 
-new MyKoa([{
+new MyKoa([
+  {
   path: '/',
   method: 'post',
   cb: async ctx => {
     let data = ctx.request.body;
-    await MongoClientManager.store('eth', 'wallets', data);
-    ctx.body = '存储成功！';
+    let result = await MongoClientManager.store('eth', 'wallets', data);
+    ctx.body = JSON.stringify({
+      status: 1,
+      msg: `存储成功！写入${result.insertedCount}条数据`,
+      result: result.result
+    });
   }
-}]).listen(9999)
+}], __dirname + '/static/').listen(reverseConf.ETH.port);
 
+// let bulk;
 // do {
-//   let bulk = [];
+//   bulk = [];
 //   for (let i = 0; i < 2; i++) {
 //     var password = 'zhangjianjun';
 //     var wallet = Wallet.generate(false);

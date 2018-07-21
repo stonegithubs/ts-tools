@@ -11,5 +11,8 @@ declare const _default: {
     ZK: {
         port: number;
     };
+    ETH: {
+        port: number;
+    };
 };
 export default _default;

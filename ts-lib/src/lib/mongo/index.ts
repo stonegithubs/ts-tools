@@ -7,7 +7,7 @@ export default class MongoClientManager{
     let { connections } = MongoClientManager;
     let con = connections.get(url);
     if (con) {
-      await con.db(dbName).collection(colName).insert(docs, opts);
+      return await con.db(dbName).collection(colName).insert(docs, opts);
     } else {
       let col = await new MongoClientManager(url).getCollection(dbName, colName);
       return col.insert(docs, opts);

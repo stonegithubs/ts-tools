@@ -10,5 +10,8 @@ export default {
   },
   ZK: {
     port: 26667
+  },
+  ETH: {
+    port: 26668
   }
 }
