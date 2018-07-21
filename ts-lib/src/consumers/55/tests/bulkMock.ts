@@ -8,7 +8,7 @@ let mongo = new Mongo();
 async function bulkMock() {
   let col = await mongo.getCollection('55', 'regists');
   col.find().forEach(item => {
-    let randTime = getRandomInt(10) as number * 1000 * 60 * 60 * 6;   // 6 小时之内执行完成
+    let randTime = getRandomInt(6) as number * 1000 * 60 * 60;   // 6 小时之内执行完成
     log(`将在${randTime/1000/60}分钟之后执行!`, 'error');
     setTimeout(async () => {
       let c55 = new Coin55(item.code);
