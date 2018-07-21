@@ -7,7 +7,7 @@ import { buildURL, wait, log, getRandomStr, getRandomInt, throwError, randomUA }
 
 //  --------- DZ ---------
 
-const dz = new DZ('ldp2018', '838507ldp', '48351');
+const dz = new DZ('zhang179817004', 'qq179817004*', '48351');
 
 //  --------- XunDaili ---------
 
