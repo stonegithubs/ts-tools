@@ -111,7 +111,6 @@ export default class Coin55 implements Requester {
   async login(phone, password) {
     await this.getData('/login/sigin.html', {}, 'get', { json: false });
     let result = await this.getData('/api/sso/user/login', { codeType: 'PHONE', phone, password });
-    console.log(result);
   }
   async task(task_id) {
     do {

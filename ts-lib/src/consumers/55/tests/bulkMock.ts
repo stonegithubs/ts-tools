@@ -15,6 +15,7 @@ async function bulkMock() {
     setTimeout(async () => {
       let c55 = new Coin55(item.code);
       await c55.login(item.phone, item.password);
+      col.updateOne({ phone: item.phone }, {$inc: { mockTime: 1 }}, { upsert: true })
     }, randTime);
   })
 }
