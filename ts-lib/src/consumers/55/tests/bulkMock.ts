@@ -18,4 +18,6 @@ async function bulkMock() {
   })
 }
 
-setInterval(bulkMock, 1000 * 60 * 60 * 12); // 12小时执行一次
+bulkMock();
+
+setInterval(bulkMock, 1000 * 60 * 60 * 22); // 22小时执行一次
