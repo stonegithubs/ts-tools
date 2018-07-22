@@ -40,7 +40,6 @@ export default class DZ implements SMS {
   // 获取短信验证码, 返回为 [{ mobile, message }] 类型
   async getMessage(size: number = 1, getMobileNumParams?: { pid: string, mobile?, size?, operator?, province?, notProvince?, vno?, city? }, reuse?: boolean, next_pid?: string): Promise<any>{
     await this._checkLogin();
-    let  { uid, token, requester } = this;
     let result = await this.getMobileNums({ size, ...getMobileNumParams });
     return result ? Promise.all(result.map(mobile => this.getMessageByMobile(mobile, reuse, next_pid))) : throwError(`没有获取到手机号:\t${JSON.stringify(result)}`);
   }

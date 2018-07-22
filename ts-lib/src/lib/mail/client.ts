@@ -1,7 +1,7 @@
 import nodemailer from 'nodemailer';
 
 let smtpConfig = {
-  host: '127.0.0.1',
+  host: 'mln.kim',
   port: 25,
   secure: false
 };
