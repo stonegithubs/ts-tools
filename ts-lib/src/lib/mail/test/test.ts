@@ -3,10 +3,10 @@ import Redis from 'ioredis';
 import { simpleParser } from 'mailparser';
 import MailServer from '../server';
 
-// let redis = new Redis({
-//   host: 'chosan.cn',
-//   password: '199381'
-// });
+let redis = new Redis({
+  host: 'chosan.cn',
+  password: '199381'
+});
 let ms = new MailServer({
   secure: false,
   hideSTARTTLS: true,
@@ -19,7 +19,7 @@ let ms = new MailServer({
     simpleParser(stream, (err, mail) => {
       cb();
       equal(err, null, '');
-      // redis.publish('mailReceived', JSON.stringify(mail));
+      redis.publish('mailReceived', JSON.stringify(mail));
     });
   }
 });
