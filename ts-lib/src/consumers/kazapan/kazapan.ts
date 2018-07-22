@@ -2,7 +2,7 @@ import Redis from 'ioredis';
 import rq from 'request';
 import Chaojiying from '../../lib/chaojiying';
 import { gMail } from '../../lib/mail/utils';
-import Mongo from '../../lib/mongo/';
+import Mongo from '../../lib/mongo';
 import XunDaili, { dynamicForwardURL } from '../../lib/proxy/xundaili';
 import DZ from '../../lib/SMS/dz/';
 import { getRandomInt, getRandomStr, log, throwError, wait, randomUA } from '../../lib/utils';
@@ -70,8 +70,8 @@ export default class KZP implements Requester {
 
     getEmailCode() {
         return new Promise(async (res, rej) => {
-            do {
-                try {
+            // do {
+            //     try {
                     let email = gMail();
                     let result = await this.getData(`/blockchain/verifyCode/sendEmail?email=${email}`);
                     if (result) {
@@ -85,10 +85,10 @@ export default class KZP implements Requester {
                             }
                         })
                     }
-                } catch (error) {
-                    log('发送验证码失败！', error, 'error');
-                }
-            } while (await wait(2000, true));
+            //     } catch (error) {
+            //         log('发送验证码失败！', error, 'error');
+            //     }
+            // } while (await wait(2000, true));
         })
     }
 

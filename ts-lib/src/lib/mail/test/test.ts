@@ -13,6 +13,7 @@ let ms = new MailServer({
   allowInsecureAuth: true,
   authOptional: true,
   onData(stream, session, cb): void {
+    console.log('收到数据！');
     let tmp = session || cb;
     tmp += tmp;
     simpleParser(stream, (err, mail) => {
