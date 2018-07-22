@@ -5,7 +5,7 @@ import reverseConf from '../../../conf/reverseProxyConf';
 import { log, getRandomInt } from '../../../lib/utils';
 
 let mongo = new Mongo();
-
+let maxCount = 200;
 let running = {};
 resume();
 
@@ -41,7 +41,7 @@ async function task(code, count): Promise<any> {
   c55.task(count);
   let runningCol = await mongo.getCollection('55', 'running');
   log(`下一次将在${randTime / 1000 / 60} 分钟后运行!`);
-  if (count++ < 50) {
+  if (count++ < maxCount) {
     setTimeout(() => { task(code, count); }, randTime);
     runningCol.updateOne({ code }, { $set: { count }}, { upsert: true });
   } else {

@@ -23,6 +23,12 @@
     {
       "type": "node",
       "request": "launch",
+      "name": "okf",
+      "program": "${workspaceFolder}/ts-lib/build/main/consumers/okf/tests/test.js"
+    },
+    {
+      "type": "node",
+      "request": "launch",
       "name": "55BulkMock",
       "program": "${workspaceFolder}/ts-lib/build/main/consumers/55/tests/bulkMock.js"
     },

@@ -1,4 +1,4 @@
-declare const _default: {
+export declare let portConf: {
     survey: {
         port: number;
     };
@@ -14,5 +14,8 @@ declare const _default: {
     ETH: {
         port: number;
     };
+    OKF: {
+        port: number;
+    };
 };
-export default _default;
+export default portConf;

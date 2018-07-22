@@ -1,4 +1,4 @@
-export default {
+export let portConf = {
   survey: {
     port: 8888
   },
@@ -13,5 +13,10 @@ export default {
   },
   ETH: {
     port: 26668
+  },
+  OKF: {
+    port: 26669
   }
 }
+
+export default portConf;

@@ -19,7 +19,9 @@ export default class MyKoa{
       .use(cors())
       .use(bodyParser())
       .use(router.routes())
-      .use(serveStatic(staticDir))
+
+      
+    staticDir && app.use(serveStatic(staticDir));
 
     this.app = app;
     this.router = router;
