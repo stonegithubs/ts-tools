@@ -55,7 +55,7 @@ export default class MyReq{
         } catch (error) {
           log('Req#JSON解析错误！', error, 'error');
         }
-         return jsonData || data;
+        return jsonData || data;
       });
   }
 

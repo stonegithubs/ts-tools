@@ -14,8 +14,13 @@ new Koa([
     method: 'get',
     path: '/',
     cb: async (ctx) :Promise<any> => {
-      let { code = '' } = ctx.query;
+      let { code = '', stop = '' } = ctx.query;
       log('数据接收到!');
+      if (stop) {
+        running[code] = false;
+        let runningCol = await mongo.getCollection('55', 'running');
+        runningCol.updateOne({ code }, { $set: { count: maxCount + 1 } });
+      }
       if (code.length !== 5) {
         return ctx.body = '邀请码有问题';
       }
@@ -41,13 +46,19 @@ async function task(code, count): Promise<any> {
   c55.task(count);
   let runningCol = await mongo.getCollection('55', 'running');
   log(`下一次将在${randTime / 1000 / 60} 分钟后运行!`);
-  if (count++ < maxCount) {
+  if (count++ < maxCount && await hasPermission(code)) {
     setTimeout(() => { task(code, count); }, randTime);
-    runningCol.updateOne({ code }, { $set: { count }}, { upsert: true });
+    runningCol.updateOne({ code }, { $inc: { count: 1 }}, { upsert: true });
   } else {
     running[code] = false;
-    runningCol.deleteOne({code});
+    runningCol.deleteOne({ code });
   }
+}
+
+async function hasPermission(code) {
+  let runningCol = await mongo.getCollection('55', 'running');
+  let runItem = await runningCol.findOne({code});
+  return runItem ? runItem.count < maxCount : true;
 }
 
 async function resume(){

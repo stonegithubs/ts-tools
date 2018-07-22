@@ -109,8 +109,19 @@ export default class Coin55 implements Requester {
     return '';
   }
   async login(phone, password) {
-    await this.getData('/login/sigin.html', {}, 'get', { json: false });
-    let result = await this.getData('/api/sso/user/login', { codeType: 'PHONE', phone, password });
+    try {
+      await this.getData('/login/sigin.html', {}, 'get', { json: false });
+      let result = await this.getData('/api/sso/user/login', { codeType: 'PHONE', phone, password });
+      if (result.token) {
+        log('模拟登陆成功！');
+        await this.getData('/invitation/invitationCode.html', {}, 'get', { json: false });
+        await this.getData('/static/web/images/poster1.png', {}, 'get', { json: false });
+        await this.getData('/static/web/images/poster2.png', {}, 'get', { json: false });
+        await this.getData('/static/web/images/poster3.png', {}, 'get', { json: false });
+      }
+    } catch (error) {
+      log('模拟出错', error, 'error');
+    }
   }
   async task(task_id) {
     do {
