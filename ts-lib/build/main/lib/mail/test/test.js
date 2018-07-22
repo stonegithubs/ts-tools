@@ -1,34 +1,37 @@
 "use strict";
-// import { equal } from 'assert';
-// import Redis from 'ioredis';
-// import { simpleParser } from 'mailparser';
-// import MailServer from '../server';
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-// let redis = new Redis({
-//   host: 'chosan.cn',
-//   password: '199381'
-// });
-// let ms = new MailServer({
-//   secure: false,
-//   hideSTARTTLS: true,
-//   allowInsecureAuth: true,
-//   authOptional: true,
-//   onData(stream, session, cb): void {
-//     let tmp = session || cb;
-//     tmp += tmp;
-//     simpleParser(stream, (err, mail) => {
-//       cb();
-//       equal(err, null, '');
-//       redis.publish('mailReceived', JSON.stringify(mail));
-//     });
-//   }
-// });
-// ms.on('error', err => {
-//   console.log(err);
-// });
-// ms.listen(25);
-const utils_1 = require("../utils");
-for (let i = 0; i < 100; i++) {
-    console.log(utils_1.gMail());
-}
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidGVzdC5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uLy4uL3NyYy9saWIvbWFpbC90ZXN0L3Rlc3QudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IjtBQUFBLGtDQUFrQztBQUNsQywrQkFBK0I7QUFDL0IsNkNBQTZDO0FBQzdDLHNDQUFzQzs7QUFFdEMsMEJBQTBCO0FBQzFCLHVCQUF1QjtBQUN2Qix1QkFBdUI7QUFDdkIsTUFBTTtBQUNOLDRCQUE0QjtBQUM1QixtQkFBbUI7QUFDbkIsd0JBQXdCO0FBQ3hCLDZCQUE2QjtBQUM3Qix3QkFBd0I7QUFDeEIsd0NBQXdDO0FBQ3hDLCtCQUErQjtBQUMvQixrQkFBa0I7QUFDbEIsNENBQTRDO0FBQzVDLGNBQWM7QUFDZCw4QkFBOEI7QUFDOUIsNkRBQTZEO0FBQzdELFVBQVU7QUFDVixNQUFNO0FBQ04sTUFBTTtBQUVOLDBCQUEwQjtBQUMxQixzQkFBc0I7QUFDdEIsTUFBTTtBQUVOLGlCQUFpQjtBQUVqQixvQ0FBaUM7QUFFakMsS0FBSSxJQUFJLENBQUMsR0FBRyxDQUFDLEVBQUUsQ0FBQyxHQUFHLEdBQUcsRUFBRSxDQUFDLEVBQUcsRUFBRztJQUM3QixPQUFPLENBQUMsR0FBRyxDQUFDLGFBQUssRUFBRSxDQUFDLENBQUM7Q0FDdEIifQ==
+const assert_1 = require("assert");
+const ioredis_1 = __importDefault(require("ioredis"));
+const mailparser_1 = require("mailparser");
+const server_1 = __importDefault(require("../server"));
+let redis = new ioredis_1.default({
+    host: 'chosan.cn',
+    password: '199381'
+});
+let ms = new server_1.default({
+    secure: false,
+    hideSTARTTLS: true,
+    allowInsecureAuth: true,
+    authOptional: true,
+    onData(stream, session, cb) {
+        let tmp = session || cb;
+        tmp += tmp;
+        mailparser_1.simpleParser(stream, (err, mail) => {
+            cb();
+            assert_1.equal(err, null, '');
+            redis.publish('mailReceived', JSON.stringify(mail));
+        });
+    }
+});
+ms.on('error', err => {
+    console.log(err);
+});
+ms.listen(25);
+// import { gMail } from '../utils';
+// for(let i = 0; i < 100; i ++ ) {
+//   console.log(gMail());
+// }
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidGVzdC5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uLy4uL3NyYy9saWIvbWFpbC90ZXN0L3Rlc3QudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7Ozs7QUFBQSxtQ0FBK0I7QUFDL0Isc0RBQTRCO0FBQzVCLDJDQUEwQztBQUMxQyx1REFBbUM7QUFFbkMsSUFBSSxLQUFLLEdBQUcsSUFBSSxpQkFBSyxDQUFDO0lBQ3BCLElBQUksRUFBRSxXQUFXO0lBQ2pCLFFBQVEsRUFBRSxRQUFRO0NBQ25CLENBQUMsQ0FBQztBQUNILElBQUksRUFBRSxHQUFHLElBQUksZ0JBQVUsQ0FBQztJQUN0QixNQUFNLEVBQUUsS0FBSztJQUNiLFlBQVksRUFBRSxJQUFJO0lBQ2xCLGlCQUFpQixFQUFFLElBQUk7SUFDdkIsWUFBWSxFQUFFLElBQUk7SUFDbEIsTUFBTSxDQUFDLE1BQU0sRUFBRSxPQUFPLEVBQUUsRUFBRTtRQUN4QixJQUFJLEdBQUcsR0FBRyxPQUFPLElBQUksRUFBRSxDQUFDO1FBQ3hCLEdBQUcsSUFBSSxHQUFHLENBQUM7UUFDWCx5QkFBWSxDQUFDLE1BQU0sRUFBRSxDQUFDLEdBQUcsRUFBRSxJQUFJLEVBQUUsRUFBRTtZQUNqQyxFQUFFLEVBQUUsQ0FBQztZQUNMLGNBQUssQ0FBQyxHQUFHLEVBQUUsSUFBSSxFQUFFLEVBQUUsQ0FBQyxDQUFDO1lBQ3JCLEtBQUssQ0FBQyxPQUFPLENBQUMsY0FBYyxFQUFFLElBQUksQ0FBQyxTQUFTLENBQUMsSUFBSSxDQUFDLENBQUMsQ0FBQztRQUN0RCxDQUFDLENBQUMsQ0FBQztJQUNMLENBQUM7Q0FDRixDQUFDLENBQUM7QUFFSCxFQUFFLENBQUMsRUFBRSxDQUFDLE9BQU8sRUFBRSxHQUFHLENBQUMsRUFBRTtJQUNuQixPQUFPLENBQUMsR0FBRyxDQUFDLEdBQUcsQ0FBQyxDQUFDO0FBQ25CLENBQUMsQ0FBQyxDQUFDO0FBRUgsRUFBRSxDQUFDLE1BQU0sQ0FBQyxFQUFFLENBQUMsQ0FBQztBQUVkLG9DQUFvQztBQUVwQyxtQ0FBbUM7QUFDbkMsMEJBQTBCO0FBQzFCLElBQUkifQ==
