@@ -49,7 +49,15 @@ async function task(code, count): Promise<any> {
     runningCol.updateOne({ code }, { $inc: { count: 1 }}, { upsert: true });
   }, {
     loop: maxCount,
-    fnStop: hasNoPermission.bind(null, code),
+    msNightMin: 120000,
+    msNightMax: 600000,
+    fnStop: () => {
+      if (new Date().getHours() === 0) {
+        return true;  // 凌晨截止
+      } else {
+        return hasNoPermission(code);
+      }
+    },
     fnStopCb: () => {
       running[code] = false;
       runningCol.deleteOne({ code });

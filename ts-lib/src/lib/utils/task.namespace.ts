@@ -19,14 +19,14 @@ export namespace Task {
   ) {
     let msAwaitTime, count = 0;
     do {
-      let hour = new Date().getHours() + 1;
+      let hour = new Date().getHours();
       let result = fn.apply(thisArg, Array.isArray(args) ? args : [args]);
       wait ? await result : result;
 
       // 计算下一次循环执行时间
       msAwaitTime = getRandomInt.apply({}, hour > 22 || hour < 8 ? [ msNightMax, msNightMin ] : [ msDayMax, msDayMin ]); // 时间在 23 点以后 到 8 点以前为夜间
       debug && log(`下一次将在${msAwaitTime / 1000 / 60}分钟后运行!`, 'warn');
-    } while (await fnWait(msAwaitTime, !(await fnStop()) && ++count < loop));
+    } while (await fnWait(msAwaitTime, ++count < loop) && !await fnStop());
     // 执行回调
     fnStopCb();
   }
