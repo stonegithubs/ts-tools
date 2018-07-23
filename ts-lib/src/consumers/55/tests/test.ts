@@ -3,9 +3,10 @@ import Koa from '../../../lib/koa';
 import Mongo from '../../../lib/mongo/';
 import reverseConf from '../../../conf/reverseProxyConf';
 import { log, getRandomInt } from '../../../lib/utils';
+import { Task } from '../../../lib/utils/task.namespace';
 
 let mongo = new Mongo();
-let maxCount = 200;
+let maxCount = 140;
 let running = {};
 resume();
 
@@ -35,30 +36,31 @@ new Koa([
       log('数据写入完成!');
     }
   }
-]).listen(reverseConf.coin55.port, function() {
-  log(`在端口${reverseConf.coin55.port}侦听成功!`);
+]).listen(reverseConf.COIN_55.port, function() {
+  log(`在端口${reverseConf.COIN_55.port}侦听成功!`);
 });
 
 
 async function task(code, count): Promise<any> {
-  let randTime = getRandomInt(10, 2) as number * 1000 * 60;
-  let c55 = new Coin55(code);
-  c55.task(count);
   let runningCol = await mongo.getCollection('55', 'running');
-  log(`下一次将在${randTime / 1000 / 60} 分钟后运行!`);
-  if (count++ < maxCount && await hasPermission(code)) {
-    setTimeout(() => { task(code, count); }, randTime);
+  Task.dayAndNight(() => {
+    let c55 = new Coin55(code);
+    c55.task(count++);
     runningCol.updateOne({ code }, { $inc: { count: 1 }}, { upsert: true });
-  } else {
-    running[code] = false;
-    runningCol.deleteOne({ code });
-  }
+  }, {
+    loop: maxCount,
+    fnStop: hasNoPermission.bind(null, code),
+    fnStopCb: () => {
+      running[code] = false;
+      runningCol.deleteOne({ code });
+    }
+  })
 }
 
-async function hasPermission(code) {
+async function hasNoPermission(code) {
   let runningCol = await mongo.getCollection('55', 'running');
   let runItem = await runningCol.findOne({code});
-  return runItem ? runItem.count < maxCount : true;
+  return !(runItem ? runItem.count < maxCount : true);
 }
 
 async function resume(){
@@ -68,5 +70,3 @@ async function resume(){
     task(el.code, el.count);
   })
 }
-
-

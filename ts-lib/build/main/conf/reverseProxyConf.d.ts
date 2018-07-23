@@ -2,7 +2,7 @@ export declare let portConf: {
     survey: {
         port: number;
     };
-    coin55: {
+    COIN_55: {
         port: number;
     };
     INVE: {
