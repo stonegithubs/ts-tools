@@ -39,7 +39,7 @@ function run(code, count): void {
     }
     let zk = new ZK(code);
     zk.task(count);
-    let randTime = getRandomInt(10, 3) as number * 1000 * 60;
+    let randTime = 30000;
     log(`${randTime / 1000 / 60}分钟以后执行下一次操作`, 'warn');
     setTimeout(() => {
         run(code, count);
