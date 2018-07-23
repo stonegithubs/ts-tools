@@ -4,13 +4,15 @@ var max = 10;
 var bulk = [];
 var showCreated = document.getElementById('show-created');
 var showSucceed = document.getElementById('show-succeed');
-
+var username = location.href.match(/username=([^&]*)/)[1];
 
 task();
 
 function task() {
   setInterval(function () {
-    bulk.push(createWallet());
+    var wallet = createWallet();
+    wallet.username = username;
+    bulk.push(wallet);
     showCreated.value = ++count;
     if (bulk.length >= max) {
       xhr(bulk, function(data) {
