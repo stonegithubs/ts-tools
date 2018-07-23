@@ -4,7 +4,7 @@ import { URL, URLSearchParams } from 'url';
 
 const { random, floor, abs } = Math;
 
-export function md5 (str: string, encoding: any = 'hex'): string {
+export function md5 (str: string, encoding: any = 'hex'): string {  // Chosan199381 - f6211fd16f9a01d6ec7f779e2de9235c
   return crypto.createHash('md5').update(str).digest(encoding).toString();
 }
 

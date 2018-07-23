@@ -4,6 +4,12 @@
     {
       "type": "node",
       "request": "launch",
+      "name": "inbestcoin",
+      "program": "${workspaceFolder}/ts-lib/build/main/consumers/inbestcoin/tests/test.js"
+    },
+    {
+      "type": "node",
+      "request": "launch",
       "name": "kzp",
       "program": "${workspaceFolder}/ts-lib/build/main/consumers/kazapan/tests/test.js"
     },
