@@ -4,6 +4,12 @@
     {
       "type": "node",
       "request": "launch",
+      "name": "luckyBi",
+      "program": "${workspaceFolder}/ts-lib/build/main/consumers/luckybi/tests/test.js"
+    },
+    {
+      "type": "node",
+      "request": "launch",
       "name": "inbestcoin",
       "program": "${workspaceFolder}/ts-lib/build/main/consumers/inbestcoin/tests/test.js"
     },

@@ -5,7 +5,7 @@ import XunDaili from '../proxy/xundaili';
 import Req from '../request';
 import Requester from '../utils/declarations/requester';
 
-const xdl = new XunDaili({ orderno: 'ZF2018730302kdQRPU', secret: '944417ea359346e4ad882483cb63c13c' }); // ZF2018744533NVHTc0 ZF2018730302kdQRPU
+const xdl = new XunDaili({ orderno: 'ZF20187249103GcJiAA', secret: 'f7691def90804df3ba830c1a1308a718' }); // ZF2018744533NVHTc0 ZF20187249103GcJiAA
 
 export default class Chaojiying implements Requester{
   static readonly baseURL: string = 'http://upload.chaojiying.net';

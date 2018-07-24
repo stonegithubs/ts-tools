@@ -13,7 +13,7 @@ const dz = new DZ('zhang179817004', 'qq179817004*', '48108');
 
 //  --------- XunDaili ---------
 
-const xdl = new XunDaili({ orderno: 'ZF2018730302kdQRPU', secret: '944417ea359346e4ad882483cb63c13c' }); // ZF2018744533NVHTc0 ZF2018730302kdQRPU
+const xdl = new XunDaili({ orderno: 'ZF20187249103GcJiAA', secret: 'f7691def90804df3ba830c1a1308a718' }); // ZF2018744533NVHTc0 ZF20187249103GcJiAA
 
 //  --------- MongoDB ---------
 
