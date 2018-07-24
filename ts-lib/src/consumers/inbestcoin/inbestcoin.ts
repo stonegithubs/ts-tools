@@ -12,7 +12,7 @@ import { inbest_md5 } from './statics/md5';
 
 //  --------- redis ---------
 
-const redis = new Redis({ host: 'chosan.cn', password: '199381' });
+const redis = new Redis({ host: 'mlo.kim', password: '199381' });
 
 redis.subscribe('mailReceived', (err, count) => err ? throwError(err.message) : log(`当前第 ${count} 位订阅 mailReceived 的用户`));
 

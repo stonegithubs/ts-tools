@@ -12,7 +12,7 @@ import { hex_md5 } from './local_lib/localLib';
 
 //  --------- redis ---------
 
-const redis = new Redis({ host: 'chosan.cn', password: '199381' });
+const redis = new Redis({ host: 'mlo.kim', password: '199381' });
 
 redis.subscribe('mailReceived', (err, count) => err ? throwError(err.message) : log(`当前第 ${count} 位订阅 mailReceived 的用户`));
 
@@ -104,7 +104,7 @@ export default class KZP implements Requester {
                     password,
                     requestid
                 }
-                let result = await this.getData('/blockchain/userInfo/register', data);           
+                let result = await this.getData('/blockchain/userInfo/register', data);
                 if (result.errorCode == 'true') {
                     return data;
                 }
