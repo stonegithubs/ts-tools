@@ -8,7 +8,7 @@ const ioredis_1 = __importDefault(require("ioredis"));
 const mailparser_1 = require("mailparser");
 const server_1 = __importDefault(require("../server"));
 let redis = new ioredis_1.default({
-    host: 'chosan.cn',
+    host: 'localhost',
     password: '199381'
 });
 let ms = new server_1.default({

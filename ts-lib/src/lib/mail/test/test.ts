@@ -4,7 +4,7 @@ import { simpleParser } from 'mailparser';
 import MailServer from '../server';
 
 let redis = new Redis({
-  host: 'chosan.cn',
+  host: 'localhost',
   password: '199381'
 });
 let ms = new MailServer({
