@@ -44,6 +44,7 @@ export default class ZK implements Requester {
                 'Referer': 'https://m.mycchk.com/login.html',
                 'User-Agent': randomUA()
             },
+            proxy: 'http://113.200.56.13:8010',
             ...rqParams,
             form: params
         } as any;

@@ -67,7 +67,7 @@ export default class MyReq{
 
   async workFlow(uri: string, data: object = {}, method: string = 'GET', params: any = {}) : Promise<any> {
     let { conf: { json }, baseURL, jar, proxy } = this;
-    const oParams = { json, ...params, jar, proxy };
+    const oParams = { json, proxy, jar, ...params };
     try {
       let response = await MyReq[(oParams.json) ? 'getJson' : 'getData'](baseURL + uri, data, method, oParams);
       this.data.push(response);
