@@ -25,8 +25,8 @@ new Koa([
     }
   },
   {
-    path: '/proxies',
-    method: 'delete',
+    path: '/delproxies',
+    method: 'get',
     cb: async ctx => {
       let { _id } = ctx.query;
       let col = await mongo.getCollection(dbName, colName);
