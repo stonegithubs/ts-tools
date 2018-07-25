@@ -14,7 +14,7 @@ export default class ProxyPoll{
   task() {
     let { conf } = this;
     childProcess.exec('python3 start.py;', conf, err => {
-      err && log('执行proxy_pool出错', err, 'error');
+      err ? log('执行proxy_pool出错', err, 'error') : log('执行 proxy_pool 完成');
     });
   }
   async checker() {
