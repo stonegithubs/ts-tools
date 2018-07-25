@@ -47,7 +47,7 @@ export default class ProxyPoll{
         if (data.origin) {
           // OK
           log('checker 成功', data);
-          col.updateOne(el, { ...el, checked: true });
+          col.updateOne(el, {$set: { checked: true }});
           count++;
         } else {
           log('checker 失败', data, 'warn');
