@@ -64,7 +64,7 @@ export default class ProxyPool{
     await Promise.all(proxies.map(async (el, index) => {
       let { protocol, ip, port } = el;
       let data;
-      let timeout = 1000 * 60 * 2;  // 超时设置为2分钟
+      let timeout = 1000 * 60 * 4;  // 超时设置为4分钟
       log(`队列中第${index + 1}条开始进行检测!`, 'warn');
       let id = setInterval(() => log(`正在检测第${index+1}条`, el, 'warn'), 10000);
       try {
@@ -80,7 +80,7 @@ export default class ProxyPool{
         } else {
           data = MyReq.getJson('http://httpbin.org/ip', {}, 'get', { proxy: `${protocol}://${ip}:${port}`, ...params });
         }
-        data = await Promise.race([data, wait(timeout, {})]);
+        data = await Promise.race([data, wait(timeout, {})]);   // timeout 可能被操作系统的 TCP timeout 覆盖， 此处设置最高4分钟，超过则认为超时
         if (data.origin) {
           // OK
           log('checker 成功', data);
@@ -101,7 +101,7 @@ export default class ProxyPool{
   }
 
   async task() {
-    // await this.crawl();
+    await this.crawl();
     return this.checker();
   }
 }
