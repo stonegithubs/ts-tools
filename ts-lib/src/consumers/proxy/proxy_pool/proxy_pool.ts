@@ -71,7 +71,6 @@ export default class ProxyPoll{
             'Host': 'httpbin.org',
             'User-Agent': randomUA(),
             'Cache-Control': 'no-cache',
-            'Upgrade-Insecure-Requests': 1,
             'Proxy-Connection': 'keep-alive',
             'Accept-Encoding': 'gzip, deflate',
             'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
