@@ -17,5 +17,8 @@ export declare let portConf: {
     OKF: {
         port: number;
     };
+    ProxyPool: {
+        port: number;
+    };
 };
 export default portConf;

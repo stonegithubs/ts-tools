@@ -16,6 +16,9 @@ export let portConf = {
   },
   OKF: {
     port: 26669
+  },
+  ProxyPool: {
+    port: 26670
   }
 }
 
