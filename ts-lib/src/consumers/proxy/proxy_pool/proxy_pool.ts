@@ -63,20 +63,19 @@ export default class ProxyPool{
     await Promise.all(proxies.map(async el => {
       let { protocol, ip, port } = el;
       try {
-        let agent = new HttpsProxyAgent({ host: ip, port });
-        let data = await MyReq.getJson('http://httpbin.org/ip', {}, 'get', {
-          rejectUnauthorized: false, agent,
+        let params = {
           headers: {
-            'Pragma': 'no-cache',
-            'Host': 'httpbin.org',
             'User-Agent': randomUA(),
-            'Cache-Control': 'no-cache',
-            'Proxy-Connection': 'keep-alive',
-            'Accept-Encoding': 'gzip, deflate',
-            'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8'
           }
-        });
+        }
+        let data;
+        if (protocol.toLowerCase() === 'https') {
+          let agent = new HttpsProxyAgent({ host: ip, port });
+          data = await MyReq.getJson('http://httpbin.org/ip', {}, 'get', { rejectUnauthorized: false, agent, params });
+        } else {
+          data = await MyReq.getJson('http://httpbin.org/ip', {}, 'get', { proxy: `${protocol}://${ip}:${port}`, params });
+        }
+
         if (data.origin) {
           // OK
           log('checker 成功', data);
