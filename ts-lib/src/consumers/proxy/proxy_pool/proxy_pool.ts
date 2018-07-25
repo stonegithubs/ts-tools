@@ -62,7 +62,7 @@ export default class ProxyPoll{
     await Promise.all(proxies.map(async el => {
       let { protocol, ip, port } = el;
       try {
-        let data = await MyReq.getJson('http://httpbin.org/ip', {}, 'get', { proxy: `${protocol}://${ip}:${port}` });
+        let data = await MyReq.getJson('http://httpbin.org/ip', {}, 'get', { rejectUnauthorized: false, proxy: `${protocol}://${ip}:${port}` });
         if (data.origin) {
           // OK
           log('checker 成功', data);
