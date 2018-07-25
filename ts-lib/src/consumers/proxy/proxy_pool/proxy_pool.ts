@@ -47,6 +47,7 @@ export default class ProxyPoll{
         if (data.origin) {
           // OK
           log('checker 成功', data);
+          col.updateOne(el, { ...el, checked: true });
           count++;
         } else {
           log('checker 失败', data, 'warn');
@@ -54,6 +55,7 @@ export default class ProxyPoll{
         }
       } catch (error) {
         log('checker 异常', error, 'error');
+        col.deleteOne(el);
       }
     }));
     return count;
