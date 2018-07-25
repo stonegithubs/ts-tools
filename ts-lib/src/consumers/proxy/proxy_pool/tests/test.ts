@@ -18,7 +18,7 @@ new Koa([
     cb: async ctx => {
       let { count = 100, begin = 0 } = ctx.query;
       let col = await mongo.getCollection(dbName, colName);
-      let data = await col.find({ lastCheckTime: { $exists: true }}).limit(+count).skip(+begin).toArray();
+      let data = await col.find({ lastCheckTime: { $exists: true }}).sort({ lastCheckTime : -1 }).limit(+count).skip(+begin).toArray();
       ctx.body = {
         status: 1,
         data
@@ -52,4 +52,4 @@ setInterval(() => {
 proxy.checker();
 setInterval(() => {
   proxy.checker();
-}, 1000 * 60 * 20);
+}, 1000 * 60 * 20);  // 20 分钟检测一次代理的可用性
