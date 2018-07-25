@@ -22,9 +22,9 @@ export default class ProxyPoll{
     let cursor = await col.find();
     let chekcParallelCount = 1000; // 一次检测1000条
     let queue = [];
-    while(cursor.hasNext()) {
-      queue.push(cursor.next());
-      if (queue.length >= chekcParallelCount || !cursor.hasNext()) {
+    while(await cursor.hasNext()) {
+      queue.push(await cursor.next());
+      if (queue.length >= chekcParallelCount || !await cursor.hasNext()) {
         let success = await this.doCheck(queue);
         log(`成功${success}条!`, 'warn');
       }
