@@ -25,6 +25,7 @@ new Koa([
       let data = await col.find(queryDoc).sort({ lastCheckTime : -1 }).limit(+count).skip(+begin).toArray();
       ctx.body = {
         status: 1,
+        count: data.length,
         data
       }
     }
