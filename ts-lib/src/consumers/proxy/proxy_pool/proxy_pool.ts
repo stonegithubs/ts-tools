@@ -60,8 +60,9 @@ export default class ProxyPool{
     let col = await mongo.getCollection('proxy', 'proxys');
     let cursor = await col.find();
     let count = 0;
-    await Promise.all(proxies.map(async el => {
+    await Promise.all(proxies.map(async (el, index) => {
       let { protocol, ip, port } = el;
+      log(`队列中第${index + 1}条开始进行检测!`, 'warn');
       try {
         let params = {
           headers: {
@@ -75,6 +76,7 @@ export default class ProxyPool{
         } else {
           data = await MyReq.getJson('http://httpbin.org/ip', {}, 'get', { proxy: `${protocol}://${ip}:${port}`, params });
         }
+        log(`队列中第${index + 1}条检测完成!`, data, 'warn');
 
         if (data.origin) {
           // OK
