@@ -47,7 +47,7 @@ export default class ProxyPoll{
         if (data.origin) {
           // OK
           log('checker 成功', data);
-          col.updateOne(el, {$set: { lastCheckTime: new Date().toString() }});
+          col.updateOne(el, {$set: { lastCheckTime: new Date().toLocaleString() }});
           count++;
         } else {
           log('checker 失败', data, 'warn');
