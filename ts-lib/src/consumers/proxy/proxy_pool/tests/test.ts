@@ -23,6 +23,19 @@ new Koa([
         data
       }
     }
+  },
+  {
+    path: '/proxies',
+    method: 'delete',
+    cb: async ctx => {
+      let { _id } = ctx.query;
+      let col = await mongo.getCollection(dbName, colName);
+      let data = await col.deleteOne({ _id });
+      ctx.body = {
+        status: 1,
+        data
+      }
+    }
   }
 ]).listen(reverseConf.ProxyPool.port, () => {
   log(`在端口${reverseConf.ProxyPool.port}侦听成功!`);
