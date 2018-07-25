@@ -15,7 +15,7 @@ export default class ProxyPoll{
     let { conf } = this;
     log('开始执行爬取任务', 'warn');
     return new Promise((res, rej) => {
-      const sp = spawn('python3', ['start.py;'], conf);
+      const sp = spawn('python3', ['start.py'], conf);
       let strOut = '';
       let strErr = '';
       sp.stdout.on('data', (data) => {
