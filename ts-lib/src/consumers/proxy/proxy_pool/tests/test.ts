@@ -43,11 +43,13 @@ new Koa([
 });
 
 // 爬取新数据
+proxy.task();
 setInterval(() => {
   proxy.task();
 }, 1000 * 60 * 30);  // 30 分钟更新一次数据库
 
 // 检测新数据
+proxy.checker();
 setInterval(() => {
   proxy.checker();
 }, 1000 * 60 * 20);
