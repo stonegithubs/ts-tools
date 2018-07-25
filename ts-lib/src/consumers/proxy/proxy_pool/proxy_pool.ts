@@ -69,13 +69,14 @@ export default class ProxyPool{
         let params = {
           headers: {
             'User-Agent': randomUA()
-          }
+          },
+          timeout: 1000 * 60 * 2
         }
         if (protocol.toLowerCase() === 'https') {
           let agent = new HttpsProxyAgent({ host: ip, port });
-          data = await MyReq.getJson('http://httpbin.org/ip', {}, 'get', { rejectUnauthorized: false, agent, params });
+          data = await MyReq.getJson('http://httpbin.org/ip', {}, 'get', { rejectUnauthorized: false, agent, ...params });
         } else {
-          data = await MyReq.getJson('http://httpbin.org/ip', {}, 'get', { proxy: `${protocol}://${ip}:${port}`, params });
+          data = await MyReq.getJson('http://httpbin.org/ip', {}, 'get', { proxy: `${protocol}://${ip}:${port}`, ...params });
         }
 
         if (data.origin) {
