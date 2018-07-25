@@ -64,6 +64,7 @@ export default class ProxyPool{
     await Promise.all(proxies.map(async (el, index) => {
       let { protocol, ip, port } = el;
       let data;
+      let timeout = 1000 * 60 * 2;  // 超时设置为2分钟
       log(`队列中第${index + 1}条开始进行检测!`, 'warn');
       let id = setInterval(() => log(`正在检测第${index+1}条`, el, 'warn'), 10000);
       try {
@@ -71,15 +72,15 @@ export default class ProxyPool{
           headers: {
             'User-Agent': randomUA()
           },
-          timeout: 1000 * 60 * 2
+          timeout
         }
         if (protocol.toLowerCase() === 'https') {
           let agent = new HttpsProxyAgent({ host: ip, port });
-          data = await MyReq.getJson('http://httpbin.org/ip', {}, 'get', { rejectUnauthorized: false, agent, ...params });
+          data = MyReq.getJson('http://httpbin.org/ip', {}, 'get', { rejectUnauthorized: false, agent, ...params });
         } else {
-          data = await MyReq.getJson('http://httpbin.org/ip', {}, 'get', { proxy: `${protocol}://${ip}:${port}`, ...params });
+          data = MyReq.getJson('http://httpbin.org/ip', {}, 'get', { proxy: `${protocol}://${ip}:${port}`, ...params });
         }
-
+        data = await Promise.race([data, wait(timeout, {})]);
         if (data.origin) {
           // OK
           log('checker 成功', data);
