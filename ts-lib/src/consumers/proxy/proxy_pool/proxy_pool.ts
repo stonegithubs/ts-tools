@@ -9,12 +9,24 @@ import childProcess from 'child_process';
 
 const mongo = new Mongo();
 
-export default class ProxyList{
+export default class ProxyPoll{
   constructor(readonly conf = { cwd: '/zhangjianjun/proxy_pool' }) {}
   task() {
     let { conf } = this;
     childProcess.exec('python3 start.py;', conf, err => {
       err && log('执行proxy_pool出错', err, 'error');
     });
+  }
+  async checker() {
+    let col = await mongo.getCollection('proxy', 'proxys');
+    let cursor = await col.find();
+    cursor.forEach(async el => {
+      let data = await MyReq.getJson('http://httpbin.org/ip');
+      if (data.origin) {
+        // OK
+      } else {
+        col.deleteOne(el);
+      }
+    })
   }
 }

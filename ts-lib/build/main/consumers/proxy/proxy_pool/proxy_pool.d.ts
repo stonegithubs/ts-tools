@@ -1,4 +1,4 @@
-export default class ProxyList {
+export default class ProxyPoll {
     readonly conf: {
         cwd: string;
     };
@@ -6,4 +6,5 @@ export default class ProxyList {
         cwd: string;
     });
     task(): void;
+    checker(): Promise<void>;
 }
