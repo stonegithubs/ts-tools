@@ -13,8 +13,9 @@ export default class ProxyPoll{
   constructor(readonly conf = { cwd: '/zhangjianjun/proxy_pool' }) {}
   task() {
     let { conf } = this;
+    log('开始执行爬取任务', 'warn');
     childProcess.exec('python3 start.py;', conf, err => {
-      err ? log('执行proxy_pool出错', err, 'error') : log('执行 proxy_pool 完成');
+      err ? log('执行proxy_pool出错', err, 'error') : log('执行 proxy_pool 完成', 'warn');
     });
   }
   async checker() {
