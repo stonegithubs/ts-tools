@@ -43,11 +43,12 @@ export default class ProxyPool{
     let chekcParallelCount = 400; // 一次检测400条
     let count = 0;
     let queue = [];
+    let round = 0;
     while(await cursor.hasNext()) {
       queue.push(await cursor.next());
       if (queue.length >= chekcParallelCount || !await cursor.hasNext()) {
         log(`从${count}条开始检测\t`, 'warn');
-        let success = await this.doCheck(queue);
+        let success = await this.doCheck(queue, ++round);
         count += queue.length;
         log(`检测成功, 参与检测\t${queue.length}\t条, 成功\t${success}\t条! 当前已检测\t${count}\t条`, 'warn');
         queue = [];
@@ -56,12 +57,13 @@ export default class ProxyPool{
     log(`检测全部完成, 共 \t${count} \t条`, 'warn');
   }
 
-  async doCheck(proxies = []) {
+  async doCheck(proxies = [], round) {
     let col = await mongo.getCollection('proxy', 'proxys');
-    let cursor = await col.find();
+    let success = 0;
     let count = 0;
     await Promise.all(proxies.map(async (el, index) => {
       let { protocol, ip, port } = el;
+      let data;
       log(`队列中第${index + 1}条开始进行检测!`, 'warn');
       try {
         let params = {
@@ -69,20 +71,18 @@ export default class ProxyPool{
             'User-Agent': randomUA()
           }
         }
-        let data;
         if (protocol.toLowerCase() === 'https') {
           let agent = new HttpsProxyAgent({ host: ip, port });
           data = await MyReq.getJson('http://httpbin.org/ip', {}, 'get', { rejectUnauthorized: false, agent, params });
         } else {
           data = await MyReq.getJson('http://httpbin.org/ip', {}, 'get', { proxy: `${protocol}://${ip}:${port}`, params });
         }
-        log(`队列中第${index + 1}条检测完成!`, data, 'warn');
 
         if (data.origin) {
           // OK
           log('checker 成功', data);
           col.updateOne(el, {$set: { lastCheckTime: new Date().toLocaleString() }});
-          count++;
+          success++;
         } else {
           log('checker 失败', data, 'warn');
           col.deleteOne(el);
@@ -91,8 +91,10 @@ export default class ProxyPool{
         log('checker 异常', error, 'error');
         col.deleteOne(el);
       }
+
+      log(`第${round}队列中第${index + 1}条检测完成，已完成${++count}条`, data, 'warn');
     }));
-    return count;
+    return success;
   }
 
   async task() {
