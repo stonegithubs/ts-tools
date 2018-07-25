@@ -27,6 +27,7 @@ export default class ProxyPoll{
       if (queue.length >= chekcParallelCount || !await cursor.hasNext()) {
         let success = await this.doCheck(queue);
         log(`成功${success}条!`, 'warn');
+        queue = [];
       }
     }
   }
