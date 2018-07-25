@@ -2,14 +2,14 @@ import Koa from '../../../../lib/koa';
 import Mongo from '../../../../lib/mongo/';
 import reverseConf from '../../../../conf/reverseProxyConf';
 import { log, getRandomInt } from '../../../../lib/utils';
-import ProxyPoll from '../proxy_pool';
+import ProxyPool from '../proxy_pool';
 
 const dbName = 'proxy';
 const colName = 'proxys';
 
 let mongo = new Mongo();
-let cursor;
-let proxy = new ProxyPoll();
+let proxy = new ProxyPool();
+loop();  // 开始爬取代理和可用性检测循环
 
 new Koa([
   {
@@ -43,17 +43,15 @@ new Koa([
   log(`在端口${reverseConf.ProxyPool.port}侦听成功!`);
 });
 
-// 爬取新数据
-proxy.task();
-setInterval(() => {
-  proxy.task();
-}, 1000 * 60 * 30);  // 30 分钟更新一次数据库
-
-// 检测新数据
-setInterval(() => {
-  proxy.checker();
-}, 1000 * 60 * 20);  // 20 分钟检测一次代理的可用性
-
+async function loop() {
+  do {
+    try {
+      await proxy.task();
+    } catch (error) {
+      log('循环出错!', error, 'error');
+    }
+  } while (true);
+}
 
 async function stripDuplicates(cursor) {
   let proxyPool = {};

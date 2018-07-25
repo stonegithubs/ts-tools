@@ -1,4 +1,4 @@
-export default class ProxyPoll {
+export default class ProxyPool {
     readonly conf: {
         cwd: string;
     };

@@ -10,7 +10,7 @@ import HttpsProxyAgent from 'https-proxy-agent'; // https 代理, 用于添加 c
 
 const mongo = new Mongo();
 
-export default class ProxyPoll{
+export default class ProxyPool{
   constructor(readonly conf = { cwd: '/zhangjianjun/proxy_pool' }) {}
   crawl() {
     let { conf } = this;
