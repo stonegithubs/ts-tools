@@ -23,23 +23,7 @@ new Koa([
         lastCheckTime: { $exists: true }
       };
       let cursor = await col.find(queryDoc).sort({ lastCheckTime : +sort }).limit(+count).skip(+begin);
-      let proxyPool = {};
-      cursor.forEach(el => {  // 去重处理
-        let { protocol, ip, port } = el;
-        let key = `${protocol}://${ip}:${port}`;
-        if (proxyPool[key]) {
-          col.deleteOne(el);
-        } else {
-          proxyPool[key] = el;
-        }
-      }, err => {
-        if (err) {
-          ctx.body = { status: 0, count: 0, data: err }
-        } else {
-          let data = Object.values(proxyPool);
-          ctx.body = { status: 1, count: data.length, data }
-        }
-      })
+      ctx.body = await stripDuplicates(cursor);
     }
   },
   {
@@ -70,3 +54,26 @@ setInterval(() => {
   proxy.checker();
 }, 1000 * 60 * 20);  // 20 分钟检测一次代理的可用性
 
+
+async function stripDuplicates(cursor) {
+  let proxyPool = {};
+  let col = await mongo.getCollection(dbName, colName);
+  return new Promise((res, rej) => {
+    cursor.forEach(el => {  // 去重处理, 使用 cursor 可以节省内存
+      let { protocol, ip, port } = el;
+      let key = `${protocol}://${ip}:${port}`;
+      if (proxyPool[key]) {
+        col.deleteOne(el);
+      } else {
+        proxyPool[key] = el;
+      }
+    }, err => {
+      if (err) {
+        rej({ status: 0, count: 0, data: err });
+      } else {
+        let data = Object.values(proxyPool);
+        res({ status: 1, count: data.length, data });
+      }
+    })
+  })
+}
