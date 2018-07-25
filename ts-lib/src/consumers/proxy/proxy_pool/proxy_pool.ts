@@ -100,7 +100,7 @@ export default class ProxyPool{
   }
 
   async task() {
-    await this.crawl();
+    // await this.crawl();
     return this.checker();
   }
 }
