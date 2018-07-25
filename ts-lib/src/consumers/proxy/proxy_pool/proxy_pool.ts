@@ -25,7 +25,9 @@ export default class ProxyPoll{
       let data = await MyReq.getJson('http://httpbin.org/ip', {}, 'get', { proxy: `${protocol}://${ip}:${port}` });
       if (data.origin) {
         // OK
+        log('checker 成功', data);
       } else {
+        log('checker 失败', data, 'warn');
         col.deleteOne(el);
       }
     })
