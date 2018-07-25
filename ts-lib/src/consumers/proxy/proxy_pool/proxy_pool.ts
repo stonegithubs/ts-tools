@@ -18,11 +18,13 @@ export default class ProxyPoll{
       const sp = spawn('python3', ['start.py'], conf);
       let strOut = '';
       let strErr = '';
-      sp.stdout.on('data', (data) => {
+      sp.stdout.on('data', data => {
         strOut += data;
+        log(data);
       });
-      sp.stderr.on('data', (data) => {
+      sp.stderr.on('data', data => {
         strErr += data;
+        log(data);
       });
       sp.on('close', code => {
         log(`抓取进程退出, 退出代码:\t${code}`, strOut);
