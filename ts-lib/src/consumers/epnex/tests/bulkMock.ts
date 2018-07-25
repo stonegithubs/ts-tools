@@ -13,7 +13,7 @@ function autoMock():void {
             count++;
             log(`当前第\t${count}\t条数据`);
             let ep = new Epnex(item.invitation);  // '00TPBBT'
-            let randTime = getRandomInt(1000 * 60 * 40) as number;   // 12 小时内完成
+            let randTime = getRandomInt(1000 * 60 * 60 * 5) as number;   // 12 小时内完成
             log(`将在\t${randTime / 1000}\t秒钟之后模拟用户操作！`, 'warn');
 
             setTimeout(async () => {
@@ -26,4 +26,4 @@ function autoMock():void {
 }
 
 autoMock();
-setInterval(autoMock, 1000 * 3600 * 24);  // 24小时执行一次
+setInterval(autoMock, 1000 * 3600 * 19);  // 19小时执行一次
