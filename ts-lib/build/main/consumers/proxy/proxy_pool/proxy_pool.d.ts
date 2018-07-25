@@ -5,7 +5,8 @@ export default class ProxyPoll {
     constructor(conf?: {
         cwd: string;
     });
-    task(): void;
+    crawl(): Promise<{}>;
     checker(): Promise<void>;
     doCheck(proxies?: any[]): Promise<number>;
+    task(): Promise<void>;
 }

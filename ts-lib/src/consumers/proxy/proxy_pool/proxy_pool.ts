@@ -3,7 +3,7 @@ import Mongo from '../../../lib/mongo';
 import { getRandomInt, getRandomStr, log, throwError, wait, randomUA } from '../../../lib/utils';
 import Requester from '../../../lib/utils/declarations/requester';
 import MyReq from '../../../lib/request';
-import childProcess from 'child_process';
+import { spawn } from 'child_process';
 
 //  --------- MongoDB ---------
 
@@ -11,12 +11,28 @@ const mongo = new Mongo();
 
 export default class ProxyPoll{
   constructor(readonly conf = { cwd: '/zhangjianjun/proxy_pool' }) {}
-  task() {
+  crawl() {
     let { conf } = this;
     log('开始执行爬取任务', 'warn');
-    childProcess.exec('python3 start.py;', conf, err => {
-      err ? log('执行proxy_pool出错', err, 'error') : log('执行 proxy_pool 完成', 'warn');
-    });
+    return new Promise((res, rej) => {
+      const sp = spawn('python3', ['start.py;'], conf);
+      let strOut = '';
+      let strErr = '';
+      sp.stdout.on('data', (data) => {
+        strOut += data;
+      });
+      sp.stderr.on('data', (data) => {
+        strErr += data;
+      });
+      sp.on('close', code => {
+        log(`抓取进程退出, 退出代码:\t${code}`);
+        res({ msg: code, output: strOut });
+      })
+      sp.on('error', err => {
+        log('执行爬取数据出错!', err);
+        rej({ msg: err, output: strErr });
+      })
+    })
   }
   async checker() {
     let col = await mongo.getCollection('proxy', 'proxys');
@@ -29,8 +45,8 @@ export default class ProxyPoll{
       if (queue.length >= chekcParallelCount || !await cursor.hasNext()) {
         log(`从${count}条开始检测\t`, 'warn');
         let success = await this.doCheck(queue);
-        log(`检测成功, 参与检测\t${queue.length}\t条, 成功\t${success}\t条!`, 'warn');
         count += queue.length;
+        log(`检测成功, 参与检测\t${queue.length}\t条, 成功\t${success}\t条! 当前已检测\t${count}\t条`, 'warn');
         queue = [];
       }
     }
@@ -60,5 +76,10 @@ export default class ProxyPoll{
       }
     }));
     return count;
+  }
+
+  async task() {
+    await this.crawl();
+    return this.checker();
   }
 }
