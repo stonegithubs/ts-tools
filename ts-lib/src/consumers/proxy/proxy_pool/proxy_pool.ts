@@ -20,16 +20,20 @@ export default class ProxyPoll{
   async checker() {
     let col = await mongo.getCollection('proxy', 'proxys');
     let cursor = await col.find();
-    let chekcParallelCount = 1000; // 一次检测1000条
+    let chekcParallelCount = 400; // 一次检测1000条
+    let count = 0;
     let queue = [];
     while(await cursor.hasNext()) {
+      count++;
       queue.push(await cursor.next());
       if (queue.length >= chekcParallelCount || !await cursor.hasNext()) {
+        log(`从${count}条开始检测\t`, 'warn');
         let success = await this.doCheck(queue);
-        log(`成功${success}条!`, 'warn');
+        log(`检测成功, 共\t${queue.length}\t条, 成功\t${success}\t条!`, 'warn');
         queue = [];
       }
     }
+    log(`检测全部完成, 共 \t${count} \t条`, 'warn');
   }
 
   async doCheck(proxies = []) {
