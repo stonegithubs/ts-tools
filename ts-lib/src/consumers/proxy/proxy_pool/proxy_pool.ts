@@ -65,7 +65,7 @@ export default class ProxyPool{
       try {
         let params = {
           headers: {
-            'User-Agent': randomUA(),
+            'User-Agent': randomUA()
           }
         }
         let data;
