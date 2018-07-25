@@ -20,11 +20,11 @@ export default class ProxyPoll{
       let strErr = '';
       sp.stdout.on('data', data => {
         strOut += data;
-        log(data);
+        log(data + '');
       });
       sp.stderr.on('data', data => {
         strErr += data;
-        log(data);
+        log(data + '');
       });
       sp.on('close', code => {
         log(`抓取进程退出, 退出代码:\t${code}`, strOut);
