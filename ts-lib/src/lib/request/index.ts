@@ -61,13 +61,12 @@ export default class MyReq{
 
   public readonly jar: object = rq.jar();  // 保存 cookie
   public data: any[] = [];
-  public proxy: string;
 
-  constructor(protected readonly baseURL: string = '', protected conf = { json: true }) {}
+  constructor(protected readonly baseURL: string = '', protected conf: any = {}) {}
 
   async workFlow(uri: string, data: object = {}, method: string = 'GET', params: any = {}) : Promise<any> {
-    let { conf: { json }, baseURL, jar, proxy } = this;
-    const oParams = { json, proxy, jar, ...params };
+    let { conf, baseURL, jar } = this;
+    const oParams = { ...conf, jar, ...params };
     try {
       let response = await MyReq[(oParams.json) ? 'getJson' : 'getData'](baseURL + uri, data, method, oParams);
       this.data.push(response);
@@ -78,6 +77,6 @@ export default class MyReq{
     }
   }
   setProxy (proxy: string): void {
-    this.proxy = proxy;
+    this.conf.proxy = proxy;
   }
 }

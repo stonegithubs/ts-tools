@@ -22,12 +22,24 @@ new Koa([
         [protocol && 'protocol']: protocol,
         lastCheckTime: { $exists: true }
       };
-      let data = await col.find(queryDoc).sort({ lastCheckTime : +sort }).limit(+count).skip(+begin).toArray();
-      ctx.body = {
-        status: 1,
-        count: data.length,
-        data
-      }
+      let cursor = await col.find(queryDoc).sort({ lastCheckTime : +sort }).limit(+count).skip(+begin);
+      let proxyPool = {};
+      cursor.forEach(el => {  // 去重处理
+        let { protocol, ip, port } = el;
+        let key = `${protocol}://${ip}:${port}`;
+        if (proxyPool[key]) {
+          col.deleteOne(el);
+        } else {
+          proxyPool[key] = el;
+        }
+      }, err => {
+        if (err) {
+          ctx.body = { status: 0, count: 0, data: err }
+        } else {
+          let data = Object.values(proxyPool);
+          ctx.body = { status: 1, count: data.length, data }
+        }
+      })
     }
   },
   {
