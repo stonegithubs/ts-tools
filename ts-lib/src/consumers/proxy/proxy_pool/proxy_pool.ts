@@ -92,7 +92,7 @@ export default class ProxyPool{
         col.deleteOne(el);
       }
 
-      log(`第${round}队列中第${index + 1}条检测完成，已完成${++count}条，共${proxies.length}条，成功${success}条`, data, 'warn');
+      log(`第${round}队列中第${index + 1}条检测完成，已完成${++count}条，共${proxies.length}条，成功${success}条`, 'warn');
     }));
     return success;
   }
