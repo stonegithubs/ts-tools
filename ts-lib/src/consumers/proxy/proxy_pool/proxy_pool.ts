@@ -29,7 +29,7 @@ export default class ProxyPoll{
       if (queue.length >= chekcParallelCount || !await cursor.hasNext()) {
         log(`从${count}条开始检测\t`, 'warn');
         let success = await this.doCheck(queue);
-        log(`检测成功, 共\t${queue.length}\t条, 成功\t${success}\t条!`, 'warn');
+        log(`检测成功, 参与检测\t${queue.length}\t条, 成功\t${success}\t条!`, 'warn');
         count += queue.length;
         queue = [];
       }
