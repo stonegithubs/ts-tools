@@ -18,7 +18,7 @@ new Koa([
     cb: async ctx => {
       let { count = 100, begin = 0 } = ctx.query;
       let col = await mongo.getCollection(dbName, colName);
-      let data = await col.find().limit(+count).skip(+begin).toArray();
+      let data = await col.find({checked: true}).limit(+count).skip(+begin).toArray();
       ctx.body = {
         status: 1,
         data
