@@ -7,4 +7,5 @@ export default class ProxyPoll {
     });
     task(): void;
     checker(): Promise<void>;
+    doCheck(proxies?: any[]): Promise<number>;
 }
