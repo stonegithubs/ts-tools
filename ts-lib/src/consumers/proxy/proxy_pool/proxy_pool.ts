@@ -25,11 +25,11 @@ export default class ProxyPoll{
         strErr += data;
       });
       sp.on('close', code => {
-        log(`抓取进程退出, 退出代码:\t${code}`);
+        log(`抓取进程退出, 退出代码:\t${code}`, strOut);
         res({ msg: code, output: strOut });
       })
       sp.on('error', err => {
-        log('执行爬取数据出错!', err);
+        log('执行爬取数据出错!', err, strErr);
         rej({ msg: err, output: strErr });
       })
     })
