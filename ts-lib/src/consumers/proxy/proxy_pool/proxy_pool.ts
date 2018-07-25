@@ -65,6 +65,7 @@ export default class ProxyPool{
       let { protocol, ip, port } = el;
       let data;
       log(`队列中第${index + 1}条开始进行检测!`, 'warn');
+      let id = setInterval(() => log(`正在检测第${index+1}条`, el, 'warn'), 10000);
       try {
         let params = {
           headers: {
@@ -92,7 +93,7 @@ export default class ProxyPool{
         log('checker 异常', error, 'error');
         col.deleteOne(el);
       }
-
+      clearInterval(id);
       log(`第${round}队列中第${index + 1}条检测完成，已完成${++count}条，共${proxies.length}条，成功${success}条`, 'warn');
     }));
     return success;
