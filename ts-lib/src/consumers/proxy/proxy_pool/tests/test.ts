@@ -56,21 +56,23 @@ async function loop() {
 async function stripDuplicates(cursor) {
   let proxyPool = {};
   let col = await mongo.getCollection(dbName, colName);
+  let duplicates = 0;
   return new Promise((res, rej) => {
     cursor.forEach(el => {  // 去重处理, 使用 cursor 可以节省内存
       let { protocol, ip, port } = el;
       let key = `${protocol}://${ip}:${port}`;
       if (proxyPool[key]) {
+        duplicates++;
         col.deleteOne(el);
       } else {
         proxyPool[key] = el;
       }
     }, err => {
       if (err) {
-        rej({ status: 0, count: 0, data: err });
+        rej({ status: 0, count: 0, duplicates, data: err });
       } else {
         let data = Object.values(proxyPool);
-        res({ status: 1, count: data.length, data });
+        res({ status: 1, count: data.length, duplicates, data });
       }
     })
   })
