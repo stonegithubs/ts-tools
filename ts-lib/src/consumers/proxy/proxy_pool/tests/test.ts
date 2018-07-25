@@ -16,13 +16,13 @@ new Koa([
     path: '/proxies',
     method: 'get',
     cb: async ctx => {
-      let { count = 100, begin = 0, protocol } = ctx.query;
+      let { count = 100, begin = 0, protocol, sort = -1 } = ctx.query;
       let col = await mongo.getCollection(dbName, colName);
       let queryDoc = {
         [protocol && 'protocol']: protocol,
         lastCheckTime: { $exists: true }
       };
-      let data = await col.find(queryDoc).sort({ lastCheckTime : -1 }).limit(+count).skip(+begin).toArray();
+      let data = await col.find(queryDoc).sort({ lastCheckTime : +sort }).limit(+count).skip(+begin).toArray();
       ctx.body = {
         status: 1,
         count: data.length,
