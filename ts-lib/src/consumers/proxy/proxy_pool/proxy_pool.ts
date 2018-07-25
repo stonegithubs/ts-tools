@@ -21,7 +21,8 @@ export default class ProxyPoll{
     let col = await mongo.getCollection('proxy', 'proxys');
     let cursor = await col.find();
     cursor.forEach(async el => {
-      let data = await MyReq.getJson('http://httpbin.org/ip');
+      let { protocol, ip, port } = el;
+      let data = await MyReq.getJson('http://httpbin.org/ip', {}, 'get', { proxy: `${protocol}://${ip}:${port}` });
       if (data.origin) {
         // OK
       } else {
