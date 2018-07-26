@@ -1,5 +1,5 @@
 import rq from 'request';
-import { log } from '../utils';
+import { log, throwError } from '../utils';
 
 export default class MyReq{
   static getData(uri: string, body: any = {}, method: string = 'GET', params: any = { json: true }): Promise<any> {
@@ -51,11 +51,11 @@ export default class MyReq{
         console.log(data);
         let jsonData;
         try {
-          jsonData = typeof data === 'string' ? JSON.parse(data) : data;
+          return typeof data === 'string' ? JSON.parse(data) : data;
         } catch (error) {
           log('Req#JSON解析错误！', error, 'error');
+          throw error;
         }
-        return jsonData || data;
       });
   }
 
@@ -73,7 +73,7 @@ export default class MyReq{
       return response;
     } catch (error) {
       console.error('Req#workFlow 错误:\t', error.message);
-      throw(error);
+      throw error;
     }
   }
   setProxy (proxy: string): void {

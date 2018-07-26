@@ -2,7 +2,7 @@ import MyReq from "../../request";
 import Requester from "../../utils/declarations/requester";
 import ProxyPool from "../proxyPool/proxyPool";
 import HttpsProxyAgent from 'https-proxy-agent'; // https 代理, 用于添加 connection 头
-import { log } from "../../utils";
+import { log, wait, throwError } from "../../utils";
 
 export default class AutoProxy implements Requester {
   static proxyList = [];
@@ -10,9 +10,10 @@ export default class AutoProxy implements Requester {
   requester = new MyReq();
   proxy: any;
   constructor() {}
-  async send(url, data = {}, method = 'get', params = {}) {
+  async send(url, data = {}, method = 'get', params: any = {}) {
     let { proxy, requester } = this;
     let { pool } = AutoProxy;
+    let timeout = params.timeout || 1000 * 60 * 4;
     if (!proxy) {
       let [ proxyUrl ] = await pool.getProxies(1, true);
       this.proxy = proxy = proxyUrl;
@@ -20,6 +21,11 @@ export default class AutoProxy implements Requester {
     let { ip, port } = proxy;
     let agent = new HttpsProxyAgent({ host: ip, port });
     log('使用代理', proxy);
-    return requester.workFlow(url, data, method, { agent, ...params });
+    let req = requester.workFlow(url, data, method, { rejectUnauthorized: false, agent, ...params });
+    if (timeout) {
+      return Promise.race([req, wait(timeout, throwError.bind(null, '发生错误'))]);
+    } else {
+      return req;
+    }
   }
 }

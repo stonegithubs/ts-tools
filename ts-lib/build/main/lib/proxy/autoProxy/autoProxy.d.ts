@@ -7,5 +7,5 @@ export default class AutoProxy implements Requester {
     requester: MyReq;
     proxy: any;
     constructor();
-    send(url: any, data?: {}, method?: string, params?: {}): Promise<any>;
+    send(url: any, data?: {}, method?: string, params?: any): Promise<any>;
 }

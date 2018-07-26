@@ -114,7 +114,7 @@ export default class ZK// implements Requester
                     txtUserName,
                     txtPassword
                 }).then(data => {
-                    log(`${taskId}登录成功：\t`, { txtUserName, txtPassword }, data);
+                    log(`${taskId}登录成功：\t`, { txtUserName, txtPassword }, data, 'warn');
                 })
             } catch (error) {
                 this.sender = new AutoProxy();

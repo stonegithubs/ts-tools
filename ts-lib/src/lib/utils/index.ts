@@ -18,7 +18,9 @@ export function getType(obj: any): string {
 }
 
 export function wait(time, data?): Promise<any> {
-  return new Promise(res => setTimeout(res.bind({}, data), time));
+  return new Promise(res => setTimeout(() => {
+    res(typeof data === 'function' ? data() : data);
+  }, time));
 }
 
 export function throwError(msg): never {
