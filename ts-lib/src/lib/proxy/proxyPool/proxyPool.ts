@@ -4,7 +4,7 @@ import { throwError, randomArray, check } from "../../utils";
 
 export default class ProxyPool implements Requester{
   static instance;
-  static domains = ['mlo.kim', 'chosan.cn', 'hk.static.kim'];
+  static domains = ['chosan.cn', 'mlo.kim', 'hk.static.kim'];
   static proxies = [];
   requester = new MyReq();
   isUpdating = false;
