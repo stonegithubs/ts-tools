@@ -1,7 +1,11 @@
 import MyReq from "../../request";
 import Requester from "../../utils/declarations/requester";
-export default class autoProxy implements Requester {
-    static cursor: number;
+import ProxyPool from "../proxyPool/proxyPool";
+export default class AutoProxy implements Requester {
     static proxyList: any[];
+    static pool: ProxyPool;
     requester: MyReq;
+    proxy: any;
+    constructor();
+    send(url: any, data?: {}, method?: string, params?: {}): Promise<any>;
 }

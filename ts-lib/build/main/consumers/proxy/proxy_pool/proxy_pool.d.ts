@@ -6,8 +6,9 @@ export default class ProxyPool {
         cwd: string;
     });
     crawl(): Promise<{}>;
-    checker(): Promise<void>;
+    checker(queryDoc?: {}): Promise<void>;
     doCheck(proxies: any[], round: any): Promise<number>;
     stripDuplicates(cursor?: any): Promise<any>;
+    checkAlive(): Promise<void>;
     task(): Promise<void>;
 }

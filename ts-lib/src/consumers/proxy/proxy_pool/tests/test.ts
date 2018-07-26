@@ -1,7 +1,7 @@
 import Koa from '../../../../lib/koa';
 import Mongo from '../../../../lib/mongo/';
 import reverseConf from '../../../../conf/reverseProxyConf';
-import { log, getRandomInt } from '../../../../lib/utils';
+import { log, getRandomInt, wait } from '../../../../lib/utils';
 import ProxyPool from '../proxy_pool';
 
 const dbName = 'proxy';
@@ -12,6 +12,7 @@ const password = 'askdfkjllskfdj23lk4jl;12341lk2jl241234ljk12l';
 let mongo = new Mongo();
 let proxy = new ProxyPool();
 loop();  // 开始爬取代理和可用性检测循环
+loopAlive();  // 循环检测一次可用性
 
 new Koa([
   {
@@ -58,4 +59,10 @@ async function loop() {
       log('循环出错!', error, 'error');
     }
   } while (true);
+}
+
+async function loopAlive() {
+  do {
+    await proxy.checkAlive();
+  } while (await wait(10000, true));  // 循环间隔 10s 检测一次可用性
 }

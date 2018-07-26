@@ -94,7 +94,6 @@ export function log(...rest): void{
     }
     return el;
   })
-
   console['log'].apply({}, [ new Date().toLocaleString(), '\n', ...rest ]);
 }
 
@@ -109,10 +108,14 @@ export function buildURL(uri = '', query = {}) {
   return `${uri}?${search}`;
 }
 
-export function until(cb) {
-
+export function randomArray(arr: Array<any>, isPop = false) {
+  let index = getRandomInt(arr.length) as number
+  if (isPop) {
+    return arr.splice(index, 1);
+  } else {
+    return arr[index];
+  }
 }
-
 
 export function randomUA() {
   let UAList = [
@@ -142,5 +145,5 @@ export function randomUA() {
     'Mozilla/5.0 (Linux; Android 7.0; STF-AL10 Build/HUAWEISTF-AL10; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/53.0.2785.49 Mobile MQQBrowser/6.2 TBS/043508 Safari/537.36 V1_AND_SQ_7.2.0_730_YYB_D QQ/7.2.0.3270 NetType/4G WebP/0.3.0 Pixel/1080',
     'Mozilla/5.0 (Linux; Android 7.0; FRD-AL00 Build/HUAWEIFRD-AL00; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/53.0.2785.49 Mobile MQQBrowser/6.2 TBS/043508 Safari/537.36 V1_AND_SQ_7.1.0_0_TIM_D TIM2.0/1.2.0.1692 QQ/6.5.5 NetType/2G WebP/0.3.0 Pixel/1080 IMEI/869953022249635'
   ]
-  return UAList[getRandomInt(UAList.length) as number];
+  return randomArray(UAList);
 }

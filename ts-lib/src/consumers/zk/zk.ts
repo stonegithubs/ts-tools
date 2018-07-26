@@ -6,6 +6,7 @@ import MyReq from '../../lib/request';
 import DZ from '../../lib/SMS/dz/';
 import { getRandomInt, getRandomStr, log, throwError, wait, randomUA } from '../../lib/utils';
 import Requester from '../../lib/utils/declarations/requester';
+import AutoProxy from '../../lib/proxy/autoProxy/autoProxy';
 
 //  --------- DZ ---------
 
@@ -20,14 +21,15 @@ const xdl = new XunDaili({ orderno: 'ZF20187249103GcJiAA', secret: 'f7691def9080
 const mongo = new Mongo();
 
 
-export default class ZK implements Requester {
+export default class ZK// implements Requester
+{
     static baseURL: 'https://m.mycchk.com/tools/submit_ajax.ashx';
-    requester: MyReq = new MyReq('', { json: false });
-
+    // requester: MyReq = new MyReq('', { json: false });
+    sender = new AutoProxy();
     constructor(protected readonly txtCode: string, public txtUserName?:string, public txtPassword?:string) {}
     async getData(params, uri?, method = 'post', rqParams = { json: true }): Promise<any> {
         // let { baseURL } = ZK;
-        let  { requester } = this;
+        let  { sender } = this;
         let url = uri || 'https://m.mycchk.com/tools/submit_ajax.ashx' + '?';
         for (const key in params) {
             if (params.hasOwnProperty(key)) {
@@ -44,12 +46,11 @@ export default class ZK implements Requester {
                 'Referer': 'https://m.mycchk.com/login.html',
                 'User-Agent': randomUA()
             },
-            proxy: 'http://113.200.56.13:8010',
             ...rqParams,
             form: params
         } as any;
-        console.log(JSON.parse(JSON.stringify(p)), xdl.wrapParams(JSON.parse(JSON.stringify(p))) );
-        return requester.workFlow(url, params, method, //xdl.wrapParams(
+        // console.log(JSON.parse(JSON.stringify(p)), xdl.wrapParams(JSON.parse(JSON.stringify(p))) );
+        return sender.send(url, params, method, //xdl.wrapParams(
             p
     //    )
         ).then(data => {
@@ -103,16 +104,23 @@ export default class ZK implements Requester {
         })
     }
 
-    async login(): Promise<any> {
+    async login(taskId?): Promise<any> {
         let { txtUserName, txtPassword } = this;
-        return this.getData({
-            action: 'user_login',
-            site_id: 2,
-            txtUserName,
-            txtPassword
-        }).then(data => {
-            log('登录信息：\t', data);
-        })
+        do {
+            try {
+                return await this.getData({
+                    action: 'user_login',
+                    site_id: 2,
+                    txtUserName,
+                    txtPassword
+                }).then(data => {
+                    log(`${taskId}登录成功：\t`, { txtUserName, txtPassword }, data);
+                })
+            } catch (error) {
+                this.sender = new AutoProxy();
+                log('登陆失败', error, 'error');
+            }
+        } while (await wait(2000, true));
     }
 
     async task(id?):Promise<any> {

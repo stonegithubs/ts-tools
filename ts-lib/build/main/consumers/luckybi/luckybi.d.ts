@@ -8,7 +8,7 @@ export default class LUCKYBI implements Requester {
         Host: string;
         Referer: string;
         user_timezone: number;
-        'User-Agent': string;
+        'User-Agent': any;
     };
     jar: any;
     constructor(inviteCode: any);

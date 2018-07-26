@@ -7,7 +7,7 @@ export default class INBEST implements Requester {
     headers: {
         Host: string;
         Referer: string;
-        'User-Agent': string;
+        'User-Agent': any;
     };
     jar: any;
     constructor(referralCode: any);

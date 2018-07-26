@@ -10,5 +10,5 @@ export declare function getDefaultChars(): string[];
 export declare function getRandomStr(maxLen?: number, minLen?: number, chars?: string[]): string;
 export declare function log(...rest: any[]): void;
 export declare function buildURL(uri?: string, query?: {}): string;
-export declare function until(cb: any): void;
-export declare function randomUA(): string;
+export declare function randomArray(arr: Array<any>, isPop?: boolean): any;
+export declare function randomUA(): any;

@@ -42,9 +42,9 @@ export default class ProxyPool{
       })
     })
   }
-  async checker() {
+  async checker(queryDoc = {}) {
     let col = await mongo.getCollection('proxy', 'proxys');
-    let cursor = await col.find().addCursorFlag('noCursorTimeout', true);  // noCursorTimeout 防止游标超时导致被数据库释放, 需要主动关闭游标
+    let cursor = await col.find(queryDoc).addCursorFlag('noCursorTimeout', true);  // noCursorTimeout 防止游标超时导致被数据库释放, 需要主动关闭游标
     let chekcParallelCount = 400; // 一次检测400条
     let count = 0;
     let queue = [];
@@ -75,12 +75,7 @@ export default class ProxyPool{
       log(`队列中第${index + 1}条开始进行检测!`, 'warn');
       let id = setInterval(() => log(`正在检测第${index+1}条`, el, 'warn'), 10000);
       try {
-        let params = {
-          headers: {
-            'User-Agent': randomUA()
-          },
-          timeout
-        }
+        let params = { headers: { 'User-Agent': randomUA() }, timeout }
         if (protocol.toLowerCase() === 'https') {
           let agent = new HttpsProxyAgent({ host: ip, port });
           data = MyReq.getJson('http://httpbin.org/ip', {}, 'get', { rejectUnauthorized: false, agent, ...params });
@@ -133,6 +128,10 @@ export default class ProxyPool{
         }
       })
     })
+  }
+
+  async checkAlive() {
+    return this.checker({lastCheckTime: { $exists: true }});
   }
 
   async task() {
