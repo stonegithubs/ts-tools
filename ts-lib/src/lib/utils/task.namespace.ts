@@ -8,6 +8,8 @@ export namespace Task {
       msDayMax = 600000, // 白天的最大触发时间  600000ms => 10min
       msNightMin = 3000000, // 夜晚的最小触发时间  3000000ms => 50min
       msNightMax = 7200000, // 夜晚的最大触发时间  7200000ms => 2h
+      dayStartHour = 8,  // 白天从 8 点开始，夜晚结束
+      dayEndHour = 22,  // 白天从22点结束，夜晚开始
       thisArg = null, // fn 的 this 对象
       fnStop = (): any => false, // 停止条件函数, 如果为 true 则会停止
       fnStopCb = (): any => {},  // 停止后的回调函数
@@ -24,7 +26,7 @@ export namespace Task {
       wait ? await result : result;
 
       // 计算下一次循环执行时间
-      msAwaitTime = getRandomInt.apply({}, hour > 22 || hour < 8 ? [ msNightMax, msNightMin ] : [ msDayMax, msDayMin ]); // 时间在 23 点以后 到 8 点以前为夜间
+      msAwaitTime = getRandomInt.apply({}, hour > dayEndHour || hour < dayStartHour ? [ msNightMax, msNightMin ] : [ msDayMax, msDayMin ]); // 时间在 23 点以后 到 8 点以前为夜间
       debug && log(`下一次将在${msAwaitTime / 1000 / 60}分钟后运行!`, 'warn');
     } while (await fnWait(msAwaitTime, ++count < loop) && !await fnStop());
     // 执行回调

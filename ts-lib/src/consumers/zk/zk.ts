@@ -65,7 +65,7 @@ export default class ZK// implements Requester
         let mb;
         do {
             log('准备获取手机号');
-            let [mobile] = (mb && [mb]) || await dz.getMobileNums();
+            let [mobile] = (mb && [mb]) || await dz.getMobileNums(); //18374266728
             log('手机号以获取', mb = mobile);
             log('准备发送手机验证码');
             let result = await this.getData({

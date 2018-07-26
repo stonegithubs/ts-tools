@@ -3,6 +3,8 @@ export declare namespace Task {
     msDayMax, // 白天的最大触发时间  600000ms => 10min
     msNightMin, // 夜晚的最小触发时间  3000000ms => 50min
     msNightMax, // 夜晚的最大触发时间  7200000ms => 2h
+    dayStartHour, // 白天从 8 点开始，夜晚结束
+    dayEndHour, // 白天从22点结束，夜晚开始
     thisArg, // fn 的 this 对象
     fnStop, // 停止条件函数, 如果为 true 则会停止
     fnStopCb, // 停止后的回调函数
@@ -14,6 +16,8 @@ export declare namespace Task {
         msDayMax?: number;
         msNightMin?: number;
         msNightMax?: number;
+        dayStartHour?: number;
+        dayEndHour?: number;
         thisArg?: any;
         fnStop?: () => any;
         fnStopCb?: () => any;
