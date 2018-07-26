@@ -45,11 +45,12 @@ export default class ProxyPool{
     let chekcParallelCount = 400; // 一次检测400条
     let count = 0;
     let queue = [];
+    let round = 0;
     while(await cursor.hasNext()) {
       queue.push(await cursor.next());
       if (queue.length >= chekcParallelCount || !await cursor.hasNext()) {
         log(`从${count}条开始检测\t`, 'warn');
-        let success = await this.doCheck(queue);
+        let success = await this.doCheck(queue, ++round);
         count += queue.length;
         log(`检测成功, 参与检测\t${queue.length}\t条, 成功\t${success}\t条! 当前已检测\t${count}\t条`, 'warn');
         queue = [];
@@ -58,33 +59,35 @@ export default class ProxyPool{
     log(`检测全部完成, 共 \t${count} \t条`, 'warn');
   }
 
-  async doCheck(proxies = []) {
+  async doCheck(proxies = [], round) {
     let col = await mongo.getCollection('proxy', 'proxys');
-    let cursor = await col.find();
+    let success = 0;
     let count = 0;
     await Promise.all(proxies.map(async (el, index) => {
       let { protocol, ip, port } = el;
+      let data;
+      let timeout = 1000 * 60 * 4;  // 超时设置为4分钟
       log(`队列中第${index + 1}条开始进行检测!`, 'warn');
+      let id = setInterval(() => log(`正在检测第${index+1}条`, el, 'warn'), 10000);
       try {
         let params = {
           headers: {
             'User-Agent': randomUA()
-          }
+          },
+          timeout
         }
-        let data;
         if (protocol.toLowerCase() === 'https') {
           let agent = new HttpsProxyAgent({ host: ip, port });
-          data = await MyReq.getJson('http://httpbin.org/ip', {}, 'get', { rejectUnauthorized: false, agent, params });
+          data = MyReq.getJson('http://httpbin.org/ip', {}, 'get', { rejectUnauthorized: false, agent, ...params });
         } else {
-          data = await MyReq.getJson('http://httpbin.org/ip', {}, 'get', { proxy: `${protocol}://${ip}:${port}`, params });
+          data = MyReq.getJson('http://httpbin.org/ip', {}, 'get', { proxy: `${protocol}://${ip}:${port}`, ...params });
         }
-        log(`队列中第${index + 1}条检测完成!`, data, 'warn');
-
+        data = await Promise.race([data, wait(timeout, {})]);   // timeout 可能被操作系统的 TCP timeout 覆盖， 此处设置最高4分钟，超过则认为超时
         if (data.origin) {
           // OK
           log('checker 成功', data);
           col.updateOne(el, {$set: { lastCheckTime: new Date().toLocaleString() }});
-          count++;
+          success++;
         } else {
           log('checker 失败', data, 'warn');
           col.deleteOne(el);
@@ -93,31 +96,35 @@ export default class ProxyPool{
         log('checker 异常', error, 'error');
         col.deleteOne(el);
       }
+      clearInterval(id);
+      log(`第${round}队列中第${index + 1}条检测完成，已完成${++count}条，共${proxies.length}条，成功${success}条`, 'warn');
     }));
-    return count;
+    return success;
   }
 
-  async stripDuplicates(cursor?) {
+  async stripDuplicates(cursor?): Promise<any> {
     let proxyPool = {};
+    let duplicates = 0;
     let col = await mongo.getCollection(dbName, colName);
     if (!cursor) {
       cursor = await col.find({ lastCheckTime: { $exists: true }});
     }
     return new Promise((res, rej) => {
       cursor.forEach(el => {  // 去重处理, 使用 cursor 可以节省内存
-        let { protocol = 'http', ip, port } = el;
-        let key = `${protocol.toLowerCase()}://${ip}:${port}`;
+        let { protocol, ip, port } = el;
+        let key = `${protocol}://${ip}:${port}`;
         if (proxyPool[key]) {
+          duplicates++;
           col.deleteOne(el);
         } else {
           proxyPool[key] = el;
         }
       }, err => {
         if (err) {
-          rej({ status: 0, count: 0, data: err });
+          rej({ status: 0, count: 0, duplicates, data: err });
         } else {
           let data = Object.values(proxyPool);
-          res({ status: 1, count: data.length, data });
+          res({ status: 1, count: data.length, duplicates, data });
         }
       })
     })
@@ -126,7 +133,7 @@ export default class ProxyPool{
   async task() {
     await this.crawl();
     await this.checker();
-    let dups = await this.stripDuplicates();
-    log(`清理重复数据${dups}条`, 'error');
+    let { duplicates } = await this.stripDuplicates();
+    log(`清理重复数据${duplicates}条`, 'error');
   }
 }
