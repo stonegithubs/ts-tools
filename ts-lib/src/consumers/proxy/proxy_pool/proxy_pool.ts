@@ -49,6 +49,7 @@ export default class ProxyPool{
     let count = 0;
     let queue = [];
     let round = 0;
+    let startTime = Date.now();
     while(await cursor.hasNext()) {
       queue.push(await cursor.next());
       if (queue.length >= chekcParallelCount || !await cursor.hasNext()) {
@@ -60,7 +61,7 @@ export default class ProxyPool{
       }
     }
     cursor.close();  // 主动关闭游标
-    log(`检测全部完成, 共 \t${count} \t条`, 'warn');
+    log(`检测全部完成, 共 \t${count} \t条, 耗时\t${ (Date.now() - startTime) / 1000 / 60 }\t分钟 `, 'warn');
   }
 
   async doCheck(proxies = [], round) {
