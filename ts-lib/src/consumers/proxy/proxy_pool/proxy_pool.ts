@@ -8,6 +8,8 @@ import HttpsProxyAgent from 'https-proxy-agent'; // https 代理, 用于添加 c
 
 //  --------- MongoDB ---------
 
+const dbName = 'proxy';
+const colName = 'proxys';
 const mongo = new Mongo();
 
 export default class ProxyPool{
@@ -95,8 +97,36 @@ export default class ProxyPool{
     return count;
   }
 
+  async stripDuplicates(cursor?) {
+    let proxyPool = {};
+    let col = await mongo.getCollection(dbName, colName);
+    if (!cursor) {
+      cursor = await col.find({ lastCheckTime: { $exists: true }});
+    }
+    return new Promise((res, rej) => {
+      cursor.forEach(el => {  // 去重处理, 使用 cursor 可以节省内存
+        let { protocol = 'http', ip, port } = el;
+        let key = `${protocol.toLowerCase()}://${ip}:${port}`;
+        if (proxyPool[key]) {
+          col.deleteOne(el);
+        } else {
+          proxyPool[key] = el;
+        }
+      }, err => {
+        if (err) {
+          rej({ status: 0, count: 0, data: err });
+        } else {
+          let data = Object.values(proxyPool);
+          res({ status: 1, count: data.length, data });
+        }
+      })
+    })
+  }
+
   async task() {
     await this.crawl();
-    return this.checker();
+    await this.checker();
+    let dups = await this.stripDuplicates();
+    log(`清理重复数据${dups}条`, 'error');
   }
 }

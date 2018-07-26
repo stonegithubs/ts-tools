@@ -6,6 +6,8 @@ import ProxyPool from '../proxy_pool';
 
 const dbName = 'proxy';
 const colName = 'proxys';
+const userName = 'lakdf;llkjqw23134lk12j;L:KJFDLK#:LEJE)(*_(_)#';
+const password = 'askdfkjllskfdj23lk4jl;12341lk2jl241234ljk12l';
 
 let mongo = new Mongo();
 let proxy = new ProxyPool();
@@ -16,14 +18,18 @@ new Koa([
     path: '/proxies',
     method: 'get',
     cb: async ctx => {
-      let { count = 100, begin = 0, protocol, sort = -1 } = ctx.query;
-      let col = await mongo.getCollection(dbName, colName);
-      let queryDoc = {
-        [protocol && 'protocol']: protocol,
-        lastCheckTime: { $exists: true }
-      };
-      let cursor = await col.find(queryDoc).sort({ lastCheckTime : +sort }).limit(+count).skip(+begin);
-      ctx.body = await stripDuplicates(cursor);
+      let { count = 100, begin = 0, protocol, sort = -1, u, p } = ctx.query;
+      if (u === userName && p === password) {
+        let col = await mongo.getCollection(dbName, colName);
+        let queryDoc = {
+          [protocol && 'protocol']: protocol,
+          lastCheckTime: { $exists: true }
+        };
+        let cursor = await col.find(queryDoc).sort({ lastCheckTime : +sort }).limit(+count).skip(+begin);
+        ctx.body = await proxy.stripDuplicates(cursor);
+      } else {
+        ctx.body = { status: 0, data: '用户名密码错误' };
+      }
     }
   },
   {
@@ -51,27 +57,4 @@ async function loop() {
       log('循环出错!', error, 'error');
     }
   } while (true);
-}
-
-async function stripDuplicates(cursor) {
-  let proxyPool = {};
-  let col = await mongo.getCollection(dbName, colName);
-  return new Promise((res, rej) => {
-    cursor.forEach(el => {  // 去重处理, 使用 cursor 可以节省内存
-      let { protocol, ip, port } = el;
-      let key = `${protocol}://${ip}:${port}`;
-      if (proxyPool[key]) {
-        col.deleteOne(el);
-      } else {
-        proxyPool[key] = el;
-      }
-    }, err => {
-      if (err) {
-        rej({ status: 0, count: 0, data: err });
-      } else {
-        let data = Object.values(proxyPool);
-        res({ status: 1, count: data.length, data });
-      }
-    })
-  })
 }
