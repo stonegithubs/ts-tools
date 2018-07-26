@@ -27,4 +27,4 @@ function autoMock():void {
 }
 
 autoMock();
-setInterval(autoMock, 1000 * 3600 * 24);  // 24小时执行一次
+setInterval(autoMock, 1000 * 3600 * 20);  // 20小时执行一次
