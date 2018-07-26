@@ -44,7 +44,7 @@ export default class ProxyPool{
   }
   async checker() {
     let col = await mongo.getCollection('proxy', 'proxys');
-    let cursor = await col.find();
+    let cursor = await col.find().noCursorTimeout();  // noCursorTimeout() 防止游标超时导致被数据库释放, 需要主动关闭游标
     let chekcParallelCount = 400; // 一次检测400条
     let count = 0;
     let queue = [];
@@ -59,6 +59,7 @@ export default class ProxyPool{
         queue = [];
       }
     }
+    cursor.close();  // 主动关闭游标
     log(`检测全部完成, 共 \t${count} \t条`, 'warn');
   }
 
@@ -89,7 +90,7 @@ export default class ProxyPool{
         if (data.origin) {
           // OK
           log('checker 成功', data);
-          col.updateOne(el, {$set: { lastCheckTime: new Date().toLocaleString() }});
+          col.updateOne(el, { $set: { lastCheckTime: new Date().toLocaleString() }});
           success++;
         } else {
           log('checker 失败', data, 'warn');
