@@ -51,6 +51,7 @@ new Koa([
 
 async function loop() {
   do {
+    log('task 开始', 'warn');
     try {
       await proxy.task();
     } catch (error) {

@@ -21,6 +21,7 @@ export default class ProxyPool{
       const sp = spawn('python3', ['start.py'], conf);
       let strOut = '';
       let strErr = '';
+      let taskId = setInterval(() => log('正在爬取', 'warn'), 6000);
       sp.stdout.on('data', data => {
         strOut += data;
         log(data + '');
@@ -31,10 +32,12 @@ export default class ProxyPool{
       });
       sp.on('close', code => {
         log(`抓取进程退出, 退出代码:\t${code}`, strOut);
+        clearInterval(taskId);
         res({ msg: code, output: strOut });
       })
       sp.on('error', err => {
         log('执行爬取数据出错!', err, strErr);
+        clearInterval(taskId);
         rej({ msg: err, output: strErr });
       })
     })
@@ -134,6 +137,6 @@ export default class ProxyPool{
     await this.crawl();
     await this.checker();
     let { duplicates } = await this.stripDuplicates();
-    log(`清理重复数据${duplicates}条`, 'error');
+    log(`task 完成, 清理重复数据${duplicates}条`, 'warn');
   }
 }
