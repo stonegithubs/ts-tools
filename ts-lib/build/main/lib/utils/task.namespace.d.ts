@@ -1,3 +1,4 @@
+import './Promise.extends';
 export declare namespace Task {
     function dayAndNight(fn?: any, { msDayMin, // 白天的最小触发时间  120000ms => 2min
     msDayMax, // 白天的最大触发时间  600000ms => 10min
@@ -22,7 +23,7 @@ export declare namespace Task {
         fnStop?: () => any;
         fnStopCb?: () => any;
         loop?: number;
-        args?: any[];
+        args?: any;
         wait?: boolean;
         debug?: boolean;
     }): Promise<void>;

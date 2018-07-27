@@ -1,6 +1,7 @@
 import colors from 'colors';
 import crypto from 'crypto';
 import { URL, URLSearchParams } from 'url';
+import './Promise.extends';
 
 const { random, floor, abs } = Math;
 
@@ -99,7 +100,7 @@ export function log(...rest): void{
   console['log'].apply({}, [ new Date().toLocaleString(), '\n', ...rest ]);
 }
 
-export function buildURL(uri = '', query = {}) {
+export function buildQueryUrl(uri = '', query = {}) {
   let uriInfo = uri.split('?');
   let search;
   if (uriInfo[1]) {

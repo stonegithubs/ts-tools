@@ -20,7 +20,8 @@ new Koa([
             if (running[code]) {
                 ctx.body = '请勿重复添加！';
             } else {
-                Task.dayAndNight(run.bind(null, code), {
+                let args = { code, count: 0 };
+                Task.dayAndNight(run.bind(null, args), {
                     loop: max,
                     dayEndHour: 24,
                     fnStopCb: () => {
@@ -36,7 +37,8 @@ new Koa([
     log(`在端口${reverseConf.ZK.port}侦听成功!`);
 });
 
-function run(code): void {
-    let zk = new ZK(code);
-    zk.task();
+function run(params): void {
+    let zk = new ZK(params.code);
+    params.count++;
+    zk.task(params.count);
 }

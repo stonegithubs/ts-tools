@@ -46,6 +46,7 @@ export default class ZK// implements Requester
                 'Referer': 'https://m.mycchk.com/login.html',
                 'User-Agent': randomUA()
             },
+            timeout: 1000 * 60 * 3,  // 设置 3 分钟超时
             ...rqParams,
             form: params
         } as any;
@@ -74,7 +75,7 @@ export default class ZK// implements Requester
                 mobile,
                 areacode: 86
             });
-            log('验证码已发送', result);
+            log(`${mobile}验证码已发送`, result);
             if (result.status === 1) {
                 log('使用DZ获取验证码');
                 let { message } = await dz.getMessageByMobile(mobile);

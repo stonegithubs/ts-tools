@@ -1,3 +1,4 @@
+import './Promise.extends';
 export declare function md5(str: string, encoding?: any): string;
 export declare function getSortedKeys(obj?: any, fn?: any): string[];
 export declare function getType(obj: any): string;
@@ -9,6 +10,6 @@ export declare function getRandomInt(max?: number, min?: number, length?: number
 export declare function getDefaultChars(): string[];
 export declare function getRandomStr(maxLen?: number, minLen?: number, chars?: string[]): string;
 export declare function log(...rest: any[]): void;
-export declare function buildURL(uri?: string, query?: {}): string;
+export declare function buildQueryUrl(uri?: string, query?: {}): string;
 export declare function randomArray(arr: Array<any>, isPop?: boolean): any;
 export declare function randomUA(): any;

@@ -3,7 +3,7 @@ import Mongo from '../../lib/mongo/';
 import XunDaili from '../../lib/proxy/xundaili';
 import MyReq from '../../lib/request';
 import DZ from '../../lib/SMS/dz/';
-import { buildURL, wait, log, getRandomStr, getRandomInt, throwError, randomUA } from '../../lib/utils';
+import { buildQueryUrl, wait, log, getRandomStr, getRandomInt, throwError, randomUA } from '../../lib/utils';
 
 //  --------- DZ ---------
 
@@ -21,7 +21,7 @@ export default class Coin55 implements Requester {
   requester = new MyReq('https://www.55.com', { json: true });
   constructor(protected inviteCode) {}
   getData(path, data, method = 'post', params = {} as any) {
-    let newPath = buildURL(path, data);
+    let newPath = buildQueryUrl(path, data);
     let { requester, inviteCode: code } = this;
     let headers = {
       token: params.token,

@@ -1,4 +1,5 @@
 import { getRandomInt, throwError, wait as fnWait, log } from '.';
+import './Promise.extends';
 
 export namespace Task {
   export async function dayAndNight(
@@ -14,7 +15,7 @@ export namespace Task {
       fnStop = (): any => false, // 停止条件函数, 如果为 true 则会停止
       fnStopCb = (): any => {},  // 停止后的回调函数
       loop = Infinity, // 循环次数
-      args = [], // fn 的参数
+      args = [] as any, // fn 的参数
       wait = false, // 是否需要在每一轮循环中等待 fn 执行完成
       debug = true // 是否开启调试信息打印
     } = {}
@@ -26,7 +27,7 @@ export namespace Task {
       wait ? await result : result;
 
       // 计算下一次循环执行时间
-      msAwaitTime = getRandomInt.apply({}, hour > dayEndHour || hour < dayStartHour ? [ msNightMax, msNightMin ] : [ msDayMax, msDayMin ]); // 时间在 23 点以后 到 8 点以前为夜间
+      msAwaitTime = getRandomInt.apply({}, hour < dayStartHour || hour >= dayEndHour ? [ msNightMax, msNightMin ] : [ msDayMax, msDayMin ]); // 时间在 23 点以后 到 8 点以前为夜间
       debug && log(`下一次将在${msAwaitTime / 1000 / 60}分钟后运行!`, 'warn');
     } while (await fnWait(msAwaitTime, ++count < loop) && !await fnStop());
     // 执行回调
