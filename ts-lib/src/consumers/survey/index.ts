@@ -7,6 +7,17 @@ let mongo = new Mongo();
 
 new Koa([
   {
+    method: 'get',
+    path: '/queryCount',
+    cb: async ctx => {
+      log('数据接收到!');
+      let col = await mongo.getCollection('survey', 'survey')
+      let result = await col.find().toArray();
+      ctx.body = { status: 1, data: result.length };
+      log('数据写入完成!', result);
+    }
+  },
+  {
     method: 'post',
     path: '/surveies',
     cb: async ctx => {
