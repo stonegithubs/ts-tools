@@ -72,3 +72,11 @@ async function resume() {
     running[code] = true;
   })
 }
+
+// async function login() {
+//     let esic = new ESIC('123');
+//     let data = await esic.login({ mobile: '15623351915', password: 'Chosan179817004' })
+//     log(data);
+// }
+
+// login();

@@ -12,13 +12,11 @@ export default class ESIC {
         'X-Requested-With': string;
     };
     getData(url: any, data?: any, method?: string, params?: any): Promise<any>;
-    getHTML(url?: string): Promise<any>;
+    getHTML(url?: string, params?: any): Promise<any>;
     getCaptcha(): Promise<any>;
     validate(captchaData?: any): Promise<any>;
     getMobile(): Promise<any>;
-    sendMsg(form?: {
-        mobile: any;
-    }): Promise<"" | {
+    sendMsg(): Promise<"" | {
         code: any;
         mobile: any;
     }>;

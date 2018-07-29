@@ -47,8 +47,10 @@ export default class ESIC {
     );
   }
 
-  async getHTML(url = '/index/publics/pwdregister.html') {
-    return this.getData(url, {}, 'get', { json: false });
+  async getHTML(url = '/index/publics/pwdregister.html', params?) {
+    params.headers = params.headers || {};
+    params.headers['X-Requested-With'] = null;
+    return this.getData(url, {}, 'get', { json: false, ...params });
   }
 
   async getCaptcha() {
@@ -73,7 +75,7 @@ export default class ESIC {
     } while (await wait(2000, true));
   }
 
-  async sendMsg(form?: { mobile }) {
+  async sendMsg() {
     let mobile;
     do {
       let captchaData = await this.getCaptcha();
@@ -83,7 +85,7 @@ export default class ESIC {
         let { challenge: geetest_challenge, validate: geetest_validate } = validateResult;
         let geetest_seccode = geetest_validate + '|jordan';
         mobile = mobile || await this.getMobile();
-        form = { mobile, geetest_challenge, geetest_validate , geetest_seccode } as any;
+        let form = { mobile, geetest_challenge, geetest_validate , geetest_seccode } as any;
         try {
           let data = await this.getData('/index/code/getcode.html', form, 'post', { form });
           let { code, msg } = data;
@@ -141,7 +143,9 @@ export default class ESIC {
 
   async login(form: { mobile, password }) {
     try {
-      await this.getHTML('/index/publics/pwdlogin.html');
+      await this.getHTML('/index/publics/pwdlogin.html', { headers: {
+        Referer: 'http://esic.vip/index/publics/pwdlogin.html'
+      } });
       let loginData = await this.getData('/index/publics/pwdlogin.html', form, 'post', { form });
       log('登录信息为：', loginData);
     } catch (error) {
