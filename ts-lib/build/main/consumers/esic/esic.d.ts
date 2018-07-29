@@ -4,8 +4,15 @@ export default class ESIC {
     static baseUrl: string;
     requester: AutoProxy;
     constructor(inviteCode: any);
+    headers: {
+        Host: string;
+        Origin: string;
+        Referer: string;
+        'User-Agent': any;
+        'X-Requested-With': string;
+    };
     getData(url: any, data?: any, method?: string, params?: any): Promise<any>;
-    getHTML(): Promise<any>;
+    getHTML(url?: string): Promise<any>;
     getCaptcha(): Promise<any>;
     validate(captchaData?: any): Promise<any>;
     getMobile(): Promise<any>;
@@ -22,5 +29,9 @@ export default class ESIC {
         invite_code: any;
         password: any;
     }): Promise<boolean>;
+    login(form: {
+        mobile: any;
+        password: any;
+    }): Promise<void>;
     task(tskId: any): Promise<void>;
 }

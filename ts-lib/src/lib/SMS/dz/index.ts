@@ -30,7 +30,11 @@ export default class DZ implements SMS {
     let action = reuse ? 'getVcodeAndHoldMobilenum' : 'getVcodeAndReleaseMobile';
     let result = '';
     do {
-      result = await requester.workFlow('', { action, uid, token, mobile, next_pid, author_uid: 'zhang179817004' }) || '';
+      try {
+        result = await requester.workFlow('', { action, uid, token, mobile, next_pid, author_uid: 'zhang179817004' }) || '';
+      } catch (error) {
+        log('dz获取短信中，出现中途异常', error, 'error');
+      }
     } while ((result === 'not_receive' || result === 'message|to_fast_try_again') && await wait(2000, true));
     log('dz获取短信结果', result);
     let [, message] = result.split('|');

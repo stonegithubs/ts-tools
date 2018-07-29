@@ -18,7 +18,7 @@ export default class AutoProxy implements Requester {
   async send(url, data = {}, method = 'get', params: any = {}) {
     let { proxy, strict, requester, debug } = this;
     let { pool } = AutoProxy;
-    let timeout = params.timeout || 1000 * 60 * 3;
+    let timeout = params.timeout || 1000 * 60 * 4.5;
     do {
       if (debug) {
         return requester.workFlow(url, data, method, { rejectUnauthorized: false, ...params });
@@ -30,7 +30,7 @@ export default class AutoProxy implements Requester {
       let { ip, port } = proxy;
       let agent = new HttpsProxyAgent({ host: ip, port });
       log('使用代理', proxy);
-      let req = requester.workFlow(url, data, method, { rejectUnauthorized: false, agent, ...params });
+      let req = requester.workFlow(url, data, method, { rejectUnauthorized: false, agent, timeout, ...params });
       let result;
       try {
         if (timeout) {
