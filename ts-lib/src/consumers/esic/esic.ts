@@ -74,28 +74,30 @@ export default class ESIC {
     do {
       let tskId;
       let captchaData = await this.getCaptcha();
-      let validateResult = await this.validate(captchaData);
-      if (validateResult.status === 'no') { continue; }
-      let { challenge: geetest_challenge, validate: geetest_validate } = validateResult;
-      let geetest_seccode = geetest_validate + '|jordan';
-      mobile = mobile || await this.getMobile();
-      form = { mobile, geetest_challenge, geetest_validate , geetest_seccode } as any;
-      try {
-        let data = await this.getData('/index/code/getcode.html', form, 'post', { form });
-        // 1 分钟发一次验证码
-        tskId = setInterval(async () => data = await this.getData('/index/code/getcode.html', form, 'post', { form }).catch(e => log(e, 'error')), 1000 * 70);
-        let { code, msg } = data;
-        if (code === 1 && msg === '验证码已发送') {
-          let { message = '' } = await dz.getMessageByMobile(form.mobile);
-          let code = message.match(/\d+/)[0];
-          return code ? { code, mobile } : throwError('没有找到手机号');
-        } else if (code === -1 && msg === '验证失败，请重新验证') {
-          return throwError('验证失败');
+      if (captchaData.gt && captchaData.challenge) {
+        let validateResult = await this.validate(captchaData);
+        if (validateResult.status === 'no') { continue; }
+        let { challenge: geetest_challenge, validate: geetest_validate } = validateResult;
+        let geetest_seccode = geetest_validate + '|jordan';
+        mobile = mobile || await this.getMobile();
+        form = { mobile, geetest_challenge, geetest_validate , geetest_seccode } as any;
+        try {
+          let data = await this.getData('/index/code/getcode.html', form, 'post', { form });
+          // 1 分钟发一次验证码
+          tskId = setInterval(async () => data = await this.getData('/index/code/getcode.html', form, 'post', { form }).catch(e => log(e, 'error')), 1000 * 70);
+          let { code, msg } = data;
+          if (code === 1 && msg === '验证码已发送') {
+            let { message = '' } = await dz.getMessageByMobile(form.mobile);
+            let code = message.match(/\d+/)[0];
+            return code ? { code, mobile } : throwError('没有找到手机号');
+          } else if (code === -1 && msg === '验证失败，请重新验证') {
+            return throwError('验证失败');
+          }
+        } catch (error) {
+          log('发送验证码出错!', error, 'error');
+        } finally {
+          clearInterval(tskId);
         }
-      } catch (error) {
-        log('发送验证码出错!', error, 'error');
-      } finally {
-        clearInterval(tskId);
       }
     } while (await wait(2000, true));
     return '';
@@ -138,10 +140,10 @@ export default class ESIC {
   async task (tskId) {
     do {
       log(`${tskId}开始!`);
-      await this.getHTML();
       let { inviteCode: invite_code } = this;
       let codeAndMobile;
       try {
+        await this.getHTML();
         codeAndMobile = await this.sendMsg();
       } catch (error) {
         log('接收验证码错误!', error, 'error');
