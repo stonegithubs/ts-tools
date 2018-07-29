@@ -9,7 +9,7 @@ export default class DZ implements SMS {
     protected token: string;
     constructor(uid: string, pwd: string, pid?: string);
     login(): Promise<any>;
-    getUserInfos(): Promise<any>;
+    getUserInfo(): Promise<any>;
     getMessageByMobile(mobile: string, reuse?: boolean, next_pid?: string): Promise<any>;
     getMessage(size?: number, getMobileNumParams?: {
         pid: string;

@@ -16,10 +16,10 @@ export default class DZ implements SMS {
   }
 
   // 获取用户信息, 包含 uid, scores(积分), coins(用户币), maxParallelCount(同时可获取号码数)
-  async getUserInfos(): Promise<any> {
+  async getUserInfo(): Promise<any> {
     await this._checkLogin();
     let { uid, token, requester } = this;
-    let result = await requester.workFlow('', { action: 'getUserInfos', uid, token });
+    let result = await requester.workFlow('', { action: 'getUserInfo', uid, token });
     let [, scores, coins, maxParallelCount] = result.split(';');
     return maxParallelCount !== undefined ? { uid, scores, coins, maxParallelCount } : throwError(`获取用户信息错误:\t${result}`);
   }

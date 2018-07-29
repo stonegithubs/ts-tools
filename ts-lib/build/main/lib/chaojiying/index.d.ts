@@ -1,6 +1,7 @@
 import Req from '../request';
 import Requester from '../utils/declarations/requester';
-export default class Chaojiying implements Requester {
+import CaptchaValidator from '../captchaValidators/captchaValidators.base';
+export default class Chaojiying implements Requester, CaptchaValidator {
     protected user: string;
     protected pass: string;
     protected softid?: string;

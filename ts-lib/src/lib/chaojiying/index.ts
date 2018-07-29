@@ -4,10 +4,11 @@ import request from 'request';
 import XunDaili from '../proxy/xundaili';
 import Req from '../request';
 import Requester from '../utils/declarations/requester';
+import CaptchaValidator from '../captchaValidators/captchaValidators.base';
 
 const xdl = new XunDaili({ orderno: 'ZF20187249103GcJiAA', secret: 'f7691def90804df3ba830c1a1308a718' }); // ZF2018744533NVHTc0 ZF20187249103GcJiAA
 
-export default class Chaojiying implements Requester{
+export default class Chaojiying implements Requester, CaptchaValidator{
   static readonly baseURL: string = 'http://upload.chaojiying.net';
   requester: Req = new Req(Chaojiying.baseURL);
   constructor(protected user: string, protected pass: string, protected softid?: string) {}

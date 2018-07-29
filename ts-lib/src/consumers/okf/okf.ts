@@ -1,10 +1,6 @@
 import Requester from "../../lib/utils/declarations/requester";
 import MyReq from "../../lib/request";
 import { getRandomInt, getRandomStr, log, throwError, wait, randomUA } from '../../lib/utils';
-import { ADDRGETNETWORKPARAMS } from "dns";
-
-
-
 
 export default class OKF implements Requester {
     static baseURL: 'http://www.okf.com';
@@ -31,7 +27,7 @@ export default class OKF implements Requester {
                 return JSON.parse(result);
             } catch (error) {
             }
-        } 
+        }
         return result;
     }
 

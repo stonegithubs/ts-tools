@@ -10,12 +10,19 @@ export default class AutoProxy implements Requester {
   requester = new MyReq();
   proxy: any;
   // strict 为 true 时，如果发送错误则会抛出错误然后退出发送数据，为 false 时则会换个 proxy 继续尝试发送
-  constructor(public strict = false) {}
+  constructor(requesterConf?, public debug = false, public strict = false) {
+    if (requesterConf) {
+      this.requester = new MyReq(requesterConf.baseUrl, requesterConf.conf);
+    }
+  }
   async send(url, data = {}, method = 'get', params: any = {}) {
-    let { proxy, strict, requester } = this;
+    let { proxy, strict, requester, debug } = this;
     let { pool } = AutoProxy;
-    let timeout = params.timeout || 1000 * 60 * 4;
+    let timeout = params.timeout || 1000 * 60 * 3;
     do {
+      if (debug) {
+        return requester.workFlow(url, data, method, { rejectUnauthorized: false, ...params });
+      }
       if (!proxy) {
         let [ proxyUrl ] = await pool.getProxies(1, true);
         this.proxy = proxy = proxyUrl;

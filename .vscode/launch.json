@@ -4,6 +4,12 @@
     {
       "type": "node",
       "request": "launch",
+      "name": "ECSI",
+      "program": "${workspaceFolder}/ts-lib/build/main/consumers/esic/tests/test.js"
+    },
+    {
+      "type": "node",
+      "request": "launch",
       "name": "luckyBi",
       "program": "${workspaceFolder}/ts-lib/build/main/consumers/luckybi/tests/test.js"
     },
