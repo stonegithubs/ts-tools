@@ -20,5 +20,8 @@ export declare let portConf: {
     ProxyPool: {
         port: number;
     };
+    ESIC: {
+        port: number;
+    };
 };
 export default portConf;

@@ -8,18 +8,19 @@ export default class ESIC {
     getHTML(): Promise<any>;
     getCaptcha(): Promise<any>;
     validate(captchaData?: any): Promise<any>;
-    getMobile(): Promise<string>;
+    getMobile(): Promise<any>;
     sendMsg(form?: {
         mobile: any;
-        geetest_challenge: any;
-        geetest_validate: any;
-        geetest_seccode: any;
-    }): Promise<string>;
+    }): Promise<"" | {
+        code: any;
+        mobile: any;
+    }>;
+    verifyPhone(mobile: any): Promise<boolean>;
     register(form?: {
         mobile: any;
         sms_code: any;
         invite_code: any;
         password: any;
-    }): Promise<void>;
-    task(): Promise<void>;
+    }): Promise<boolean>;
+    task(tskId: any): Promise<void>;
 }

@@ -19,6 +19,9 @@ export let portConf = {
   },
   ProxyPool: {
     port: 26670
+  },
+  ESIC: {
+    port: 26671
   }
 }
 
