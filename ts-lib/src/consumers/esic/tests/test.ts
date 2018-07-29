@@ -61,14 +61,13 @@ function run(params): void {
 
 async function storeRunningInfo(code) {
   const col = await mongo.getCollection(dbName, colName);
-  const item = await col.findOne({ code });
   col.updateOne({ code }, { $inc: { count: 1 }}, { upsert: true });
 }
 
 async function resume() {
   const col = await mongo.getCollection(dbName, colName);
   col.find().forEach(el => {
-    let code = el;
+    let { code } = el;
     addTask(el);
     running[code] = true;
   })
