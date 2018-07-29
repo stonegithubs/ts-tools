@@ -19,6 +19,9 @@ new Koa([
         path: '/',
         cb: async (ctx): Promise<any> => {
             let { code = '' } = ctx.query;
+            if (code.length != 6) {
+                return ctx.body = { status: 0, msg: '邀请码不正确' };
+            }
             if (running[code]) {
                 ctx.body = '请勿重复添加！';
             } else {
