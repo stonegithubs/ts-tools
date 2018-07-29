@@ -8,7 +8,7 @@ import { Task } from '../../../lib/utils/task.namespace';
 const mongo = new Mongo();
 const dbName = 'esic';
 const colName = 'running';
-const max = 30;
+const max = 100;
 const running = {}
 
 resume();
