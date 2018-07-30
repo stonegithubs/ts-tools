@@ -31,12 +31,14 @@ export default class ESIC {
   static baseUrl = 'http://esic.vip';
   requester = new AutoProxy({ baseUrl: 'http://esic.vip', conf: { json: true }}, debug);
   constructor(public inviteCode) {};
+  ajaxHeader = {
+    'X-Requested-With': 'XMLHttpRequest'
+  }
   headers = {
     Host: 'esic.vip',
     Origin: 'http://esic.vip',
     Referer: 'http://esic.vip/index/publics/pwdregister.html',
-    'User-Agent': randomUA(),
-    'X-Requested-With': 'XMLHttpRequest'
+    'User-Agent': randomUA()
   }
   async getData(url, data?, method = 'post', params: any = {}) {
     let { requester, headers } = this;
@@ -47,14 +49,19 @@ export default class ESIC {
     );
   }
 
-  async getHTML(url = '/index/publics/pwdregister.html', params?) {
+  async getHTML(url = '/index/publics/pwdregister.html', params: any = {}) {
+    let headers = {
+      Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+      'Upgrade-Insecure-Requests': 1
+    }
     params.headers = params.headers || {};
-    params.headers['X-Requested-With'] = null;
+    params.headers = { ...headers, ...params.headers };
     return this.getData(url, {}, 'get', { json: false, ...params });
   }
 
   async getCaptcha() {
-    return this.getData(`/index/publics/startcaptchaservlet.html?t=${Date.now()}`);
+    let { ajaxHeader: headers } = this;
+    return this.getData(`/index/publics/startcaptchaservlet.html?t=${Date.now()}`, {}, 'get', { headers } );
   }
 
   async validate(captchaData: any = {}) {
@@ -77,6 +84,8 @@ export default class ESIC {
 
   async sendMsg() {
     let mobile;
+    let { ajaxHeader: headers } = this;
+
     do {
       let captchaData = await this.getCaptcha();
       if (captchaData.gt && captchaData.challenge) {
@@ -87,7 +96,7 @@ export default class ESIC {
         mobile = mobile || await this.getMobile();
         let form = { mobile, geetest_challenge, geetest_validate , geetest_seccode } as any;
         try {
-          let data = await this.getData('/index/code/getcode.html', form, 'post', { form });
+          let data = await this.getData('/index/code/getcode.html', form, 'post', { form, headers });
           let { code, msg } = data;
           if (code === 1 && msg === '验证码已发送') {
             let { message = '' } = await dz.getMessageByMobile(form.mobile);
@@ -108,9 +117,11 @@ export default class ESIC {
   }
 
   async verifyPhone(mobile) {
+    let { ajaxHeader: headers } = this;
+
     do {
       try {
-        let result = await this.getData('/index/publics/verifymobile.html', { mobile }, 'get');
+        let result = await this.getData('/index/publics/verifymobile.html', { mobile }, 'get', { headers });
         let { code, msg } = result;
         if (code === 1 && msg === '该手机号已注册请登录') {
           return false;
@@ -125,8 +136,9 @@ export default class ESIC {
   }
 
   async register(form?: { mobile, sms_code, invite_code, password }) {
+    let { ajaxHeader: headers } = this;
     do {
-      let regResult = await this.getData('/index/publics/pwdregister.html', form, 'post', { form });
+      let regResult = await this.getData('/index/publics/pwdregister.html', form, 'post', { form, headers });
       let { code, msg } = regResult;
       if (code === 1) {
         return true;
@@ -142,15 +154,33 @@ export default class ESIC {
   }
 
   async login(form: { mobile, password }) {
+    let { ajaxHeader: headers } = this;
     try {
       await this.getHTML('/index/publics/pwdlogin.html', { headers: {
         Referer: 'http://esic.vip/index/publics/pwdlogin.html'
       } });
-      let loginData = await this.getData('/index/publics/pwdlogin.html', form, 'post', { form });
-      log('登录信息为：', loginData);
+      let loginData = await this.getData('/index/publics/pwdlogin.html', form, 'post', { form, headers });
+      if (loginData.code === 1 && loginData.msg === '登录成功') {
+        log('登录成功! 登陆信息为信息为：', loginData);
+        this.redirect();
+      }
     } catch (error) {
       log('登录错误！', error, 'error');
     }
+  }
+
+  async redirect() {
+    do {
+      try {
+        let redirectResult = await this.getHTML('', {});
+        if (redirectResult && ~redirectResult.indexOf('<title>ESIC企服链</title>')) {
+          log('注册完成, 重定向完成!');
+          break;
+        }
+      } catch (error) {
+        log('重定向错误!', error, 'error');
+      }
+    } while (await wait(30000, true));
   }
 
   async task (tskId) {
@@ -159,7 +189,8 @@ export default class ESIC {
       let { inviteCode: invite_code } = this;
       let codeAndMobile;
       try {
-        await this.getHTML();
+        let html = await this.getHTML();
+        log('111')
         codeAndMobile = await this.sendMsg();
       } catch (error) {
         log('接收验证码错误!', error, 'error');
@@ -179,6 +210,7 @@ export default class ESIC {
       }
       if (regResult) {
         let col = await mongo.getCollection('esic', 'regists');
+        this.redirect();
         col.insertOne(regParams);
         log(`${tskId}结束!`, 'warn');
         return;

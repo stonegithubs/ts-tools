@@ -4,12 +4,14 @@ export default class ESIC {
     static baseUrl: string;
     requester: AutoProxy;
     constructor(inviteCode: any);
+    ajaxHeader: {
+        'X-Requested-With': string;
+    };
     headers: {
         Host: string;
         Origin: string;
         Referer: string;
         'User-Agent': any;
-        'X-Requested-With': string;
     };
     getData(url: any, data?: any, method?: string, params?: any): Promise<any>;
     getHTML(url?: string, params?: any): Promise<any>;
@@ -31,5 +33,6 @@ export default class ESIC {
         mobile: any;
         password: any;
     }): Promise<void>;
+    redirect(): Promise<void>;
     task(tskId: any): Promise<void>;
 }
