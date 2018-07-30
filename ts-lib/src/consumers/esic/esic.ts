@@ -104,8 +104,10 @@ export default class ESIC {
             return code ? { code, mobile } : throwError('没有找到手机号');
           } else if (code === -1 && msg === '验证失败，请重新验证') {
             // 验证失败过后没发短信，手机号还可以用
+            log('验证失败!! 即将重新验证!', 'warn');
             // return throwError('验证失败');
           } else {
+            log('发送验证码失败, 错误:', data, 'warn');
             mobile = null;
           }
         } catch (error) {
@@ -190,7 +192,6 @@ export default class ESIC {
       let codeAndMobile;
       try {
         let html = await this.getHTML();
-        log('111')
         codeAndMobile = await this.sendMsg();
       } catch (error) {
         log('接收验证码错误!', error, 'error');
@@ -210,10 +211,9 @@ export default class ESIC {
       }
       if (regResult) {
         let col = await mongo.getCollection('esic', 'regists');
-        this.redirect();
-        col.insertOne(regParams);
-        log(`${tskId}结束!`, 'warn');
-        return;
+        col.insertOne({ ...regParams, date: new Date().toLocaleString() });
+        await this.redirect();
+        return log(`${tskId}结束!`, 'warn');
       }
     } while (await wait(2000, true));
   }
