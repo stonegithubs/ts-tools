@@ -12,5 +12,6 @@ export default class ZK {
     sendMSG(): Promise<any>;
     register(params: any): Promise<any>;
     login(taskId?: any): Promise<any>;
+    getInviteCode(taskId?: any): Promise<any>;
     task(id?: any): Promise<any>;
 }

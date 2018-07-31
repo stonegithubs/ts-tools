@@ -119,9 +119,15 @@ export default class ZK// implements Requester
                 })
             } catch (error) {
                 this.sender = new AutoProxy();
-                log('登陆失败', error, 'error');
+                log(`${taskId}登陆失败`, error, 'error');
             }
         } while (await wait(2000, true));
+    }
+
+    async getInviteCode(taskId?) {
+        let login = await this.login(taskId);
+        let html = await this.getData({}, 'https://m.mycchk.com/user/invite/invite.html', 'get', { json: false });
+        return html.match(/<span style="text-align: center;display:block;color:deepskyblue;font-size:16px;">邀请码：([A-Z0-9]+)</)[1];
     }
 
     async task(id?):Promise<any> {
