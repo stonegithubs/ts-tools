@@ -10,7 +10,7 @@ export default class ProxyPool implements Requester{
   isUpdating = false;
   constructor () {
     let { instance } = ProxyPool;
-    return instance as ProxyPool || this;
+    return ProxyPool.instance = instance as ProxyPool || this;
   }
 
   /**
