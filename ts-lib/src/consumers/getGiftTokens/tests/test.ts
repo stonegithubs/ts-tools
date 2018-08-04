@@ -4,7 +4,7 @@ import puppeteer from 'puppeteer';
 let count = 0;
 (async () => {
     const browser = await puppeteer.launch({
-        headless: false
+        // headless: false
       });
       const page = await browser.newPage();
       await page.setViewport({

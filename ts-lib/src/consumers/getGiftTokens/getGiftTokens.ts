@@ -12,8 +12,9 @@ export default async (page, username='zhangjianjun', password = 'Zhang199381*') 
   await page.focus('[name="password"]');
   await page.type('[name="password"]', password);
   await myWaitAndClick('a[ng-click="genNewWallet()"]');
-  await myWaitAndClick('[ng-click="downloaded()"]')
-  await myWaitAndClick(`[ng-class="fileDownloaded ? '' : 'disabled' "]`);
+  // await myWaitAndClick('[ng-click="downloaded()"]')
+  // await myWaitAndClick(`[ng-class="fileDownloaded ? '' : 'disabled' "]`);
+  await page.$eval('span[translate="GET_ConfButton"]', el => el.click());
   await page.waitForSelector('section.block__main>textarea.ng-binding', {visible:true});
   let privateKey = await page.$eval('section.block__main>textarea.ng-binding', el => el.value);
   if (privateKey) {
@@ -44,10 +45,10 @@ export default async (page, username='zhangjianjun', password = 'Zhang199381*') 
     } catch (error) {
       log('加载错误！', error, 'error');
     }
-    await page.waitFor(1000);
+    await page.waitFor(2000);
     let col = await mongo.getCollection('gift', 'regists');
     await col.insertOne({username, password, address, privateKey, date: new Date().toLocaleString(), gift: true});
-    console.log('结束！');
+    log('结束！');
   }
 };
 
