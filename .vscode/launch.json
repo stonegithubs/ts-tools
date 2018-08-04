@@ -4,6 +4,18 @@
     {
       "type": "node",
       "request": "launch",
+      "name": "storeGift2Platform",
+      "program": "${workspaceFolder}/ts-lib/build/main/consumers/getGiftTokens/tests/storeGift2Platform.js"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "getGiftTokens",
+      "program": "${workspaceFolder}/ts-lib/build/main/consumers/getGiftTokens/tests/test.js"
+    },
+    {
+      "type": "node",
+      "request": "launch",
       "name": "ECSI",
       "program": "${workspaceFolder}/ts-lib/build/main/consumers/esic/tests/test.js"
     },
