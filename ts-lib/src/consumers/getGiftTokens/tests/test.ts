@@ -1,18 +1,27 @@
 import fnGetGift from '../getGiftTokens';
 import puppeteer from 'puppeteer';
+import { log } from '../../../lib/utils';
 
 let count = 0;
 (async () => {
     const browser = await puppeteer.launch({
-        // headless: false
+        headless: false
       });
-      const page = await browser.newPage();
-      await page.setViewport({
-        width: 1190,
-        height: 1000,
-        devtools: true
-      })
+      let page = await browser.newPage();
       do {
-          await fnGetGift(page);
-      } while (++count < 100);
+          let result;
+          await page.setViewport({
+              width: 1920,
+              height: 1000
+          })
+          try {
+            await fnGetGift(page);
+          } catch (error) {
+              log('循环错误！', error);
+              if (!page.isClosed()) {
+                await page.close();
+              }
+              page = await browser.newPage();
+          }
+      } while (await page.waitFor(1500) || true);
 })()

@@ -23,5 +23,8 @@ export declare let portConf: {
     ESIC: {
         port: number;
     };
+    Gift: {
+        port: number;
+    };
 };
 export default portConf;

@@ -22,6 +22,9 @@ export let portConf = {
   },
   ESIC: {
     port: 26671
+  },
+  Gift: {
+    port: 26672
   }
 }
 

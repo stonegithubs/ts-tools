@@ -5,12 +5,16 @@ import { waitAndClick } from '../../lib/utils/puppeteer-utils';
 let mongo = new MongoClientManager();
 
 export default async (page, username='zhangjianjun', password = 'Zhang199381*') => {
-  await page.goto('https://www.myetherwallet.com/#generate-wallet');
+  await page.goto('https://www.myetherwallet.com/#generate-wallet', {timeout: 1000 * 90});
   let myWaitAndClick = waitAndClick.bind(null, page);
   await myWaitAndClick('li[ng-click="tabClick($index)"]>a[translate="NAV_GenerateWallet_alt"]');
   await myWaitAndClick('[name="password"]');
   await page.focus('[name="password"]');
   await page.type('[name="password"]', password);
+  await page.$eval('[name="password"]', el => {
+    password = el.value;
+    console.log(el.value)
+  });
   await myWaitAndClick('a[ng-click="genNewWallet()"]');
   // await myWaitAndClick('[ng-click="downloaded()"]')
   // await myWaitAndClick(`[ng-class="fileDownloaded ? '' : 'disabled' "]`);
@@ -47,8 +51,9 @@ export default async (page, username='zhangjianjun', password = 'Zhang199381*') 
     }
     await page.waitFor(2000);
     let col = await mongo.getCollection('gift', 'regists');
-    await col.insertOne({username, password, address, privateKey, date: new Date().toLocaleString(), gift: true});
+    await col.insertOne({username, password, address, privateKey, new: 1,date: new Date().toLocaleString(), gift: true});
     log('结束！');
-  }
+    return true;
+  } else return false;
 };
 
